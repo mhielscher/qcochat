@@ -1,0 +1,68 @@
+html {
+    height: 100%;
+}
+
+body {
+    font: 12px Arial;
+    color: #111111;
+    text-align: center;
+    padding: 35px;
+    height: 100%;
+}
+
+input {
+    font: 12px Arial;
+}
+
+a {
+    color: #0000FF;
+    text-decoration: none;
+}
+
+a:hover {
+    text-decoration: underline;
+}
+
+#loginFrame {
+    margin: auto auto;
+    display: block;
+}
+
+#chatFrame {
+    display: none;
+}
+
+#video {
+    min-width: 320px;
+    min-height: 240px;
+    width: auto;
+    height: auto;
+    border: 1px solid #000000;
+    background: #666666;
+    display: block;
+}
+
+#chatbox {
+    text-align: left;
+    margin: 0 auto;
+    margin-bottom: 20px;
+    padding: 10px;
+    background: #ffffff;
+    height: auto;
+    width: auto;
+    border: 1px solid #000000;
+    overflow: auto;
+    font: 14px "Courier New", Monaco, monospace; 
+}
+
+#messageBox {
+    width: auto;
+    max-width: 100%;
+    border: 1px solid #000000;
+}
+
+#messageSubmit {
+    width: 60px;
+    border: 1px solid #000000;
+}
+
