@@ -1,13 +1,7 @@
-html {
-    height: 100%;
-}
-
 body {
     font: 12px Arial;
     color: #111111;
-    text-align: center;
     padding: 35px;
-    height: 100%;
 }
 
 input {
@@ -24,6 +18,7 @@ a:hover {
 }
 
 #loginFrame {
+    text-align: center;
     margin: auto auto;
     display: block;
 }
@@ -42,10 +37,15 @@ a:hover {
     display: block;
 }
 
+#buttonBar {
+    text-align: left;
+    padding: 4px 0;
+}
+
 #chatbox {
     text-align: left;
     margin: 0 auto;
-    margin-bottom: 20px;
+    margin-bottom: 10px;
     padding: 10px;
     background: #ffffff;
     height: auto;
@@ -55,10 +55,18 @@ a:hover {
     font: 14px "Courier New", Monaco, monospace; 
 }
 
+#messageForm {
+    margin: 0;
+    padding: 0;
+}
+
 #messageBox {
+    margin: 0;
     width: auto;
     max-width: 100%;
+    margin-left: 0;
     border: 1px solid #000000;
+    text-align: left;
 }
 
 #messageSubmit {

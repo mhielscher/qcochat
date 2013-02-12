@@ -29,7 +29,7 @@
                     More test text<br />
                     and more
                 </div>
-                <form id="messageForm" action="">
+                <form id="messageForm" action="" onSubmit="return sendMessage();">
                     <input type="text" id="messageBox" name="message" size="500" />
                     <input type="submit" id="messageSubmit" name="messageSubmit" value="Send" />
                 </form>
@@ -59,6 +59,17 @@
                     videobox.appendChild(vid);
                 }
             }
+            resizeElements();
+        }
+        
+        function resizeElements() {
+            $("#messageBox").width($("#chat").width() - $("#messageSubmit").outerWidth() - 6);
+            $("#chatbox").height($(window).height() - $("#chatbox").position().top - parseInt($("#chatbox").css('margin-bottom')) - $("#messageBox").height() - 64);
+            console.log("Resized chatbox to height="+$("#chatbox").height());
+            console.log($(window).height());
+            console.log($("#chatbox").position().top);
+            console.log(parseInt($("#chatbox").css('padding-bottom')));
+            console.log($("#messageSubmit").outerWidth());
         }
         
         function broadcast() {
@@ -68,6 +79,15 @@
                 document.getElementById("broadcastButton").innerHTML = "Stop Broadcasting";
             else
                 document.getElementById("broadcastButton").innerHTML = "Start Broadcasting";
+        }
+        
+        function sendMessage() {
+            $("#messageBox").val("");
+            return false;
+        }
+        
+        window.onresize = function() {
+            resizeElements();
         }
     </script> 
     </body>
