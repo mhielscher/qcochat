@@ -48,6 +48,7 @@ webRTC.rtc.on('chat_msg', function(data, socket) {
         soc.send(JSON.stringify({
           "eventName": "receive_chat_msg",
           "data": {
+            "type": data.type,
             "username": data.username,
             "messages": data.messages,
             "color": data.color
