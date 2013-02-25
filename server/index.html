@@ -55,8 +55,11 @@
                 alert("Your browser is not supported or you must turn on flags. Go to chrome://flags and turn on Enable PeerConnection, then restart Chrome.");
             }
             
+            
+            
             var room = "0";
-            rtc.connect("ws:" + window.location.href.substring(window.location.protocol.length), room);
+            rtc.connect("ws:" + window.location.href.substring(window.location.protocol.length).split('#')[0], room);
+            
             rtc.on('add remote stream', function(stream, socketId) {
                 console.log("Adding remote stream...");
                 var video = document.createElement("video");
@@ -74,6 +77,13 @@
                 removeVideo("remote"+socketId);
             });
             
+            //console.log(rtc.initializedStreams +' ' + rtc.numStreams);
+            console.log(rtc.connections);
+            setTimeout(function() {
+              rtc.fire('ready');
+              }, 500);
+            //broadcast();
+            $("#video").show();
         }
         
         function removeVideo(videoId) {
@@ -110,6 +120,7 @@
                     var video = document.createElement("video");
                     video.id = "you";
                     //video.src = URL.createObjectURL(stream);
+                    video.setAttribute("class", "flip");
                     document.getElementById("video").appendChild(video);
                     videos.push(video);
                     rtc.attachStream(stream, video.id);
@@ -129,7 +140,7 @@
             return false;
         }
         
-        window.onresize = function() {
+        window.onresize = function(event) {
             resizeElements();
         }
         
@@ -181,14 +192,14 @@
                 }
               }));
               colors[username] = color;
-              addToChat("", "Your color has been changed.", color);
+              addToChat("color", "", "", color);
             }
             else if (input.value.slice(0, 4) == "/me ") {
               chat.send(JSON.stringify({
                 "eventName": "chat_msg",
                 "data": {
                   "type": "pubemote",
-                  "messages": input.value,
+                  "messages": input.value.slice(4),
                   "username": username,
                   "room": room,
                   "color": color
@@ -250,13 +261,16 @@
           case 'join':
             msg = '<strong style="padding-left: 15px;">' + username + ' has joined the chat.</strong>';
             break;
+          case 'color':
+            msg = '<strong style="color: ' + color + '; padding-left: 15px;">Your color has been changed.</strong>';
+            break;
           case 'pubmsg':
             msg = '<span style="color: ' + color + '; padding-left: 15px;">' + username + ': ' + msg + '</span>';
             break;
           case 'pubemote':
             msg = '<span style="color: ' + color + '; padding-left: 15px;">*' + username + " " + msg + '</span>';
             break;
-        }d
+        }
         messages.innerHTML = messages.innerHTML + msg + '<br>';
         messages.scrollTop = 10000;
       }
@@ -274,7 +288,8 @@
       }
       
       function sanitize(msg) {
-        return $("<div/>").text(msg).html();
+        //return $("<div/>").text(msg).html();
+        return msg;
       }
     </script> 
     </body>
