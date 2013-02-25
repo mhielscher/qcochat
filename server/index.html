@@ -13,7 +13,7 @@
         <div id="loginFrame">
             <form name="login" action="" onSubmit="return do_login();">
                 <label for="username">Username</label>
-                <input type="text" id="username" name="username" value="" size="32" />
+                <input type="text" id="username" name="username" value="" size="32" autofocus />
                 <input type="submit" id="submitLogin" name="submitLogin" value="Login" />
             </form>
         </div>
@@ -79,10 +79,10 @@
             
             //console.log(rtc.initializedStreams +' ' + rtc.numStreams);
             console.log(rtc.connections);
-            setTimeout(function() {
-              rtc.fire('ready');
-              }, 500);
-            //broadcast();
+            //setTimeout(function() {
+            //  rtc.fire('ready');
+            //  }, 500);
+            broadcast();
             $("#video").show();
         }
         
@@ -117,20 +117,23 @@
             if (broadcasting) {
                 $("#broadcastButton").html("Stop Broadcasting");
                 rtc.createStream({"video": true, "audio": true}, function(stream) {
-                    var video = document.createElement("video");
-                    video.id = "you";
-                    //video.src = URL.createObjectURL(stream);
-                    video.setAttribute("class", "flip");
-                    document.getElementById("video").appendChild(video);
-                    videos.push(video);
-                    rtc.attachStream(stream, video.id);
-                    resizeElements();
-                    video.play();
+                  var video = document.createElement("video");
+                  video.id = "you";
+                  //video.src = URL.createObjectURL(stream);
+                  video.setAttribute("class", "flip");
+                  document.getElementById("video").appendChild(video);
+                  videos.push(video);
+                  rtc.attachStream(stream, video.id);
+                  resizeElements();
+                  video.play();
+                }, function(stream) {
+                  rtc.fire('ready');
                 });
             }
             else {
                 $("#broadcastButton").html("Start Broadcasting");
                 removeVideo("you");
+                rtc.fire('close_stream');
             }
             resizeElements();
         }
