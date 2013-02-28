@@ -75,20 +75,23 @@
             rtc.on("disconnect stream", function(socketId) {
                 console.log("Removing "+socketId);
                 removeVideo("remote"+socketId);
+                //rtc.sendOffer(socketId);
+                resizeElements();
             });
             
             //console.log(rtc.initializedStreams +' ' + rtc.numStreams);
             console.log(rtc.connections);
-            //setTimeout(function() {
-            //  rtc.fire('ready');
-            //  }, 500);
-            broadcast();
-            $("#video").show();
+            setTimeout(function() {
+                rtc.fire('ready');
+              }, 500);
+            //broadcast();
+            //$("#video").show();
         }
         
         function removeVideo(videoId) {
           var video = document.getElementById(videoId);
           if (video) {
+              video.src = null;
               videos.splice(videos.indexOf(video), 1);
               video.parentNode.removeChild(video);
           }
@@ -112,11 +115,11 @@
         }
         
         function broadcast() {
-            console.log("Broadcasting...");
             broadcasting = !broadcasting;
             if (broadcasting) {
                 $("#broadcastButton").html("Stop Broadcasting");
                 rtc.createStream({"video": true, "audio": true}, function(stream) {
+                  console.log("Broadcasting...");
                   var video = document.createElement("video");
                   video.id = "you";
                   //video.src = URL.createObjectURL(stream);
@@ -126,14 +129,29 @@
                   rtc.attachStream(stream, video.id);
                   resizeElements();
                   video.play();
+                  rtc.addStreams();
+                  rtc.sendOffers();
                 }, function(stream) {
-                  rtc.fire('ready');
+                  //rtc.fire('ready');
+                  console.log("createStream failed.");
+                  stream.stop();
                 });
             }
             else {
                 $("#broadcastButton").html("Start Broadcasting");
                 removeVideo("you");
-                rtc.fire('close_stream');
+                for (var i = 0; i < rtc.streams.length; i++) {
+                  var stream = rtc.streams[i];
+                  console.log('Removing stream.');
+                  console.log(stream);
+                  for (var connection in rtc.peerConnections) {
+                    rtc.peerConnections[connection].removeStream(stream);
+                    rtc.sendOffer(connection);
+                  }
+                  stream.stop();
+                }
+                rtc.streams = [];
+                resizeElements();
             }
             resizeElements();
         }
