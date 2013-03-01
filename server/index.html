@@ -13,14 +13,14 @@
         <div id="loginFrame">
             <label for="username">Username</label>
             <input type="text" id="username" name="username" value="" size="32" autofocus />
-            <input type="submit" id="submitLogin" name="submitLogin" value="Login" />
+            <input type="submit" id="submitLogin" name="submitLogin" value="Login" onclick="do_login()" />
         </div>
         <div id="chatFrame">
             <div id="video">
             </div>
             <div id="buttonBar">
                 <button type="button" id="broadcastButton" onclick="broadcast()">Start Broadcasting</button>
-                <label for="useAudio">Audio</label><input type="checkbox" id="useAudio" onclick="mute()" disabled />
+                <label for="useAudio">Audio</label> <input type="checkbox" id="useAudio" onclick="mute()" disabled />
             </div>
             <div id="chat">
                 <div id="chatbox">
@@ -33,8 +33,10 @@
             var videos = [];
             var username = "guest";
             var broadcasting = false;
-            var colors = {}
-            var PeerConnection = window.PeerConnection || window.webkitPeerConnection00 || window.webkitRTCPeerConnection;
+            var users = [];
+            var history = [];
+            
+            //var PeerConnection = window.PeerConnection || window.webkitPeerConnection00 || window.webkitRTCPeerConnection;
 
             function do_login() {
                 username = document.getElementById("username").value.trim();
@@ -213,7 +215,22 @@
                             users[username].color = color;
                             addToChat("color", "", "", color.hex);
                         }
-                        else if (input.value.slice(0, 4) == "/me ") {
+                        else if (input.value.slice(0, 6) === "/nick ") {
+                            var newUsername = input.value.slice(6).trim();
+                            chat.send(JSON.stringify({
+                                "eventName": "chat_msg",
+                                "data": {
+                                    "type": "nick",
+                                    "messages": newUsername,
+                                    "username": username,
+                                    "room": room,
+                                    "color": color
+                                }
+                            }));
+                            addToChat("nick", username, newUsername, color.hex);
+                            username = newUsername;
+                        }
+                        else if (input.value.slice(0, 4) === "/me ") {
                             chat.send(JSON.stringify({
                                 "eventName": "chat_msg",
                                 "data": {
@@ -274,17 +291,25 @@
                 rtc.on(chat.event, function () {
                     var data = chat.recv.apply(this, arguments);
                     //console.log(data.color);
-                    if (data.type == "join") {
-                        addToChat(data.type, data.username);
-                        users[data.username] = {'color': data.color};
-                    } else if (data.type == "color") {
-                        users[data.username].color = data.color;
-                    } else if (data.type == "pubmsg") {
-                        addToChat(data.type, data.username, data.messages, data.color.hex);
-                    if (!(data.username in colors))
-                        colors[username] = color;
-                    } else if (data.type == "pubemote") {
-                        addToChat(data.type, data.username, data.messages, data.color.hex);
+                    switch (data.type) {
+                        case 'join':
+                            addToChat(data.type, data.username);
+                            users[data.username] = {'color': data.color};
+                            break;
+                        case 'color':
+                            users[data.username].color = data.color;
+                            break;
+                        case 'nick':
+                            addToChat(data.type, data.username, data.messages, data.color.hex);
+                            users[data.messages] = users[data.username];
+                            delete data[username];
+                            break;
+                        case 'pubmsg':
+                            addToChat(data.type, data.username, data.messages, data.color.hex);
+                            break;
+                        case 'pubemote':
+                            addToChat(data.type, data.username, data.messages, data.color.hex);
+                            break;
                     }
                 });
 
@@ -315,6 +340,9 @@
                     case 'color':
                         msg = '<strong style="color: ' + color + '; padding-left: 15px;">Your color has been changed.</strong>';
                         break;
+                    case 'nick':
+                        msg = '<strong style="padding-left: 15px;">' + username + ' is now know as ' + msg + '</strong>';
+                        break;
                     case 'pubmsg':
                         msg = '<span style="color: ' + color + '; padding-left: 15px;">' + username + ': ' + msg + '</span>';
                         break;
@@ -323,7 +351,12 @@
                         break;
                 }
                 messages.innerHTML = messages.innerHTML + msg + '<br>';
-                messages.scrollTop = 10000;
+                messages.scrollTop = 100000;
+                if (message.scrollTop === 100000) {
+                    messages.removeChild(messages.firstChild);
+                    messages.removeChild(messages.firstChild);
+                    messages.scrollTop = 100000;
+                }
             }
 
             function randomColor() {
