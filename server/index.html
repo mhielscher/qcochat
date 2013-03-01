@@ -34,8 +34,12 @@
         var videos = [];
         var username = "guest";
         var broadcasting = false;
-        var colors = {}
-        var PeerConnection = window.PeerConnection || window.webkitPeerConnection00 || window.webkitRTCPeerConnection;
+        var colors = {};
+        var users = [];
+        var history = [""];
+        var historyPosition = 0;
+        
+        //var PeerConnection = window.PeerConnection || window.webkitPeerConnection00 || window.webkitRTCPeerConnection;
         
         function do_login() {
             username = document.getElementById("username").value.trim();
@@ -200,7 +204,7 @@
 
         input.addEventListener('keydown', function(event) {
           var key = event.which || event.keyCode;
-          if (key === 13) {
+          if (key === 13 && input.value.trim() !== "") {
             if (input.value.trim() == "/color") {
               color = randomColor();
               chat.send(JSON.stringify({
@@ -212,8 +216,8 @@
                   "color": color
                 }
               }));
-              colors[username] = color;
-              addToChat("color", "", "", color);
+              users[username].color = color;
+              addToChat("color", "", "", color.hex);
             }
             else if (input.value.slice(0, 4) == "/me ") {
               chat.send(JSON.stringify({
@@ -226,7 +230,7 @@
                   "color": color
                 }
               }));
-              addToChat("pubemote", username, input.value, color);
+              addToChat("pubemote", username, input.value.slice(4), color.hex);
             }
             else {
               chat.send(JSON.stringify({
@@ -239,24 +243,52 @@
                   "color": color
                 }
               }));
-              addToChat("pubmsg", username, input.value, color);
+              addToChat("pubmsg", username, input.value, color.hex);
             }
+            history[history.length-1] = input.value;
+            historyPosition = history.length;
+            history.push("");
             input.value = "";
+          }
+          else if (key === 38) { // Up arrow
+            if (historyPosition > 0) {
+              if (historyPosition === history.length-1)
+                history[history.length-1] = input.value;
+              else if (input.value !== history[historyPosition]) {
+                if (history[history.length-1] === "")
+                  history[history.length-1] = input.value;
+                else
+                  history.push(input.value);
+              }
+              historyPosition--;
+              input.value = history[historyPosition];
+            }
+          }
+          else if (key === 40) { // Down arrow
+            if (historyPosition < history.length-1) {
+              if (input.value !== history[historyPosition]) {
+                if (history[history.length-1] === "")
+                  history[history.length-1] = input.value;
+                else
+                  history.push(input.value);
+              }
+              historyPosition++;
+              input.value = history[historyPosition];
+            }
           }
         }, false);
         rtc.on(chat.event, function() {
           var data = chat.recv.apply(this, arguments);
           //console.log(data.color);
           if (data.type == "join") {
-            addToChat(data.type, data.username, "", data.color);
+            addToChat(data.type, data.username);
+            users[data.username] = {'color': data.color};
           } else if (data.type == "color") {
-            colors[data.username] = data.color;
+            users[data.username].color = data.color;
           } else if (data.type == "pubmsg") {
-            addToChat(data.type, data.username, data.messages, data.color);
-            if (!(data.username in colors))
-              colors[username] = color;
+            addToChat(data.type, data.username, data.messages, data.color.hex);
           } else if (data.type == "pubemote") {
-            addToChat(data.type, data.username, data.messages, data.color);
+            addToChat(data.type, data.username, data.messages, data.color.hex);
           }
         });
         
@@ -265,19 +297,20 @@
             "eventName": "chat_msg",
             "data": {
               "type": "join",
-              //"messages": joinMsg,
+              "messages": "",
               "username": username,
               "room": room,
               "color": color
             }
           })) }, 500);
-        colors[username] = color;
+        users[username] = {'color': color};
         addToChat("join", username);
       }
       
       function addToChat(type, username, msg, color) {
         var messages = document.getElementById('chatbox');
-        msg = sanitize(msg);
+        if (msg)
+          msg = sanitize(msg);
         switch (type) {
           case 'join':
             msg = '<strong style="padding-left: 15px;">' + username + ' has joined the chat.</strong>';
@@ -297,20 +330,25 @@
       }
       
       function randomColor() {
+        var tries = 0;
         do {
+          tries++;
           var red = ((1<<8)*Math.random()|0);
           var green = ((1<<8)*Math.random()|0);
           var blue = ((1<<8)*Math.random()|0);
           var intensity = 0.299 * red + 0.587 * green + 0.114 * blue;
-          // Have to find a way to convert between hex format and .red, .green, .blue
-        } while (intensity > 128);
-        var color = (red<<16)+(green<<8)+blue;
-        return "#"+color.toString(16);
+          var minDistance = (1<<8);
+          for (username in users) {
+            minDistance = Math.min(minDistance, Math.max(Math.abs(red-users[username].r), Math.abs(green-users[username].g), Math.abs(blue-users[username].b)));
+          }
+        } while (intensity > 128 || (minDistance < 32 && tries < 20));
+        var hex = '#'+((red<<16)+(green<<8)+blue).toString(16);
+        return {'r': red, 'g': green, 'b': blue, 'hex': hex};
       }
       
       function sanitize(msg) {
-        //return $("<div/>").text(msg).html();
-        return msg;
+        return $('<div/>').text(msg).html();
+        //return msg;
       }
     </script> 
     </body>
