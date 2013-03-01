@@ -11,17 +11,16 @@
     </head>
     <body>
         <div id="loginFrame">
-            <form name="login" action="" onSubmit="return do_login();">
-                <label for="username">Username</label>
-                <input type="text" id="username" name="username" value="" size="32" autofocus />
-                <input type="submit" id="submitLogin" name="submitLogin" value="Login" />
-            </form>
+            <label for="username">Username</label>
+            <input type="text" id="username" name="username" value="" size="32" autofocus />
+            <input type="submit" id="submitLogin" name="submitLogin" value="Login" />
         </div>
         <div id="chatFrame">
             <div id="video">
             </div>
             <div id="buttonBar">
                 <button type="button" id="broadcastButton" onclick="broadcast()">Start Broadcasting</button>
+                <label for="useAudio">Audio</label><input type="checkbox" id="useAudio" onclick="mute()" disabled />
             </div>
             <div id="chat">
                 <div id="chatbox">
@@ -30,289 +29,294 @@
             </div>
         </div>
         <script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.3/jquery.min.js"></script>  
-    <script type="text/javascript">  
-        var videos = [];
-        var username = "guest";
-        var broadcasting = false;
-        var colors = {}
-        var PeerConnection = window.PeerConnection || window.webkitPeerConnection00 || window.webkitRTCPeerConnection;
-        
-        function do_login() {
-            username = document.getElementById("username").value.trim();
-            if (username == "")
-              return false;
-            
-            document.getElementById("loginFrame").style.display = "none";
-            document.getElementById("chatFrame").style.display = "block";
-            resizeElements();
-            init();
-            initChat();
-            return false;
-        }
-        
-        function init() {
-            if (!PeerConnection) {
-                alert("Your browser is not supported or you must turn on flags. Go to chrome://flags and turn on Enable PeerConnection, then restart Chrome.");
+        <script type="text/javascript">  
+            var videos = [];
+            var username = "guest";
+            var broadcasting = false;
+            var colors = {}
+            var PeerConnection = window.PeerConnection || window.webkitPeerConnection00 || window.webkitRTCPeerConnection;
+
+            function do_login() {
+                username = document.getElementById("username").value.trim();
+                if (username == "")
+                    return false;
+
+                document.getElementById("loginFrame").style.display = "none";
+                document.getElementById("chatFrame").style.display = "block";
+                resizeElements();
+                init();
+                initChat();
+                return false;
             }
-            
-            
-            
-            var room = "0";
-            rtc.connect("ws:" + window.location.href.substring(window.location.protocol.length).split('#')[0], room);
-            
-            rtc.on('add remote stream', function(stream, socketId) {
-                console.log("Adding remote stream...");
-                var video = document.createElement("video");
-                video.id = "remote"+socketId;
-                //video.setAttribute("class", "");
-                document.getElementById("video").appendChild(video);
-                videos.push(video);
-                rtc.attachStream(stream, video.id);
-                resizeElements();
-                //rtc.attachStream(stream, video.id);
-                video.play();
-            });
-            rtc.on("disconnect stream", function(socketId) {
-                console.log("Removing "+socketId);
-                removeVideo("remote"+socketId);
-                //rtc.sendOffer(socketId);
-                resizeElements();
-            });
-            
-            //console.log(rtc.initializedStreams +' ' + rtc.numStreams);
-            console.log(rtc.connections);
-            setTimeout(function() {
-                rtc.fire('ready');
-              }, 500);
-            //broadcast();
-            //$("#video").show();
-        }
-        
-        function removeVideo(videoId) {
-          var video = document.getElementById(videoId);
-          if (video) {
-              video.src = null;
-              videos.splice(videos.indexOf(video), 1);
-              video.parentNode.removeChild(video);
-          }
-        }
-        
-        function resizeElements() {
-            //$("#messageBox").width($("#chat").width() - $("#messageSubmit").outerWidth() - 6);
-            if (videos.length > 0)
-                $("#video").show();
-            else
-                $("#video").hide();
-            if ($("#video").css("display") == "block") {
-                $("#video").height(Math.min(240, $(window).height()/2.5));
-                //console.log($('#video').height());
-                for (var i=0; i<videos.length; i++) {
-                    videos[i].height = $("#video").innerHeight();
-                    videos[i].width = 1.333 * videos[i].height;
+
+            function init() {
+                if (!PeerConnection) {
+                    alert("Your browser is not supported or you must turn on flags. Go to chrome://flags and turn on Enable PeerConnection, then restart Chrome.");
                 }
-            }
-            $("#chatbox").height($(window).height() - $("#chatbox").position().top - parseInt($("#chatbox").css('margin-bottom')) - $("#messageBox").height() - 48);
-        }
-        
-        function broadcast() {
-            broadcasting = !broadcasting;
-            if (broadcasting) {
-                $("#broadcastButton").html("Stop Broadcasting");
-                rtc.createStream({"video": true, "audio": true}, function(stream) {
-                  console.log("Broadcasting...");
-                  var video = document.createElement("video");
-                  video.id = "you";
-                  //video.src = URL.createObjectURL(stream);
-                  video.setAttribute("class", "flip");
-                  document.getElementById("video").appendChild(video);
-                  videos.push(video);
-                  rtc.attachStream(stream, video.id);
-                  resizeElements();
-                  video.play();
-                  rtc.addStreams();
-                  rtc.sendOffers();
-                }, function(stream) {
-                  //rtc.fire('ready');
-                  console.log("createStream failed.");
-                  stream.stop();
+
+
+
+                var room = "0";
+                rtc.connect("ws:" + window.location.href.substring(window.location.protocol.length).split('#')[0], room);
+
+                rtc.on('add remote stream', function (stream, socketId) {
+                    console.log("Adding remote stream...");
+                    var video = document.createElement("video");
+                    video.id = "remote"+socketId;
+                    //video.setAttribute("class", "");
+                    document.getElementById("video").appendChild(video);
+                    videos.push(video);
+                    rtc.attachStream(stream, video.id);
+                    resizeElements();
+                    //rtc.attachStream(stream, video.id);
+                    video.play();
                 });
+                rtc.on("disconnect stream", function (socketId) {
+                    console.log("Removing "+socketId);
+                    removeVideo("remote"+socketId);
+                    //rtc.sendOffer(socketId);
+                    resizeElements();
+                });
+
+                //console.log(rtc.initializedStreams +' ' + rtc.numStreams);
+                console.log(rtc.connections);
+                setTimeout(function () {
+                    rtc.fire('ready');
+                }, 500);
+                //broadcast();
+                //$("#video").show();
             }
-            else {
-                $("#broadcastButton").html("Start Broadcasting");
-                removeVideo("you");
-                for (var i = 0; i < rtc.streams.length; i++) {
-                  var stream = rtc.streams[i];
-                  console.log('Removing stream.');
-                  console.log(stream);
-                  for (var connection in rtc.peerConnections) {
-                    rtc.peerConnections[connection].removeStream(stream);
-                    rtc.sendOffer(connection);
-                  }
-                  stream.stop();
+
+            function removeVideo(videoId) {
+                var video = document.getElementById(videoId);
+                if (video) {
+                    video.src = null;
+                    videos.splice(videos.indexOf(video), 1);
+                    video.parentNode.removeChild(video);
                 }
-                rtc.streams = [];
+            }
+
+            function resizeElements() {
+                //$("#messageBox").width($("#chat").width() - $("#messageSubmit").outerWidth() - 6);
+                if (videos.length > 0)
+                    $("#video").show();
+                    else
+                    $("#video").hide();
+                    if ($("#video").css("display") == "block") {
+                    $("#video").height(Math.min(240, $(window).height()/2.5));
+                    //console.log($('#video').height());
+                    for (var i=0; i<videos.length; i++) {
+                        videos[i].height = $("#video").innerHeight();
+                        videos[i].width = 1.333 * videos[i].height;
+                    }
+                }
+                $("#chatbox").height($(window).height() - $("#chatbox").position().top - parseInt($("#chatbox").css('margin-bottom')) - $("#messageBox").height() - 48);
+            }
+
+            function broadcast() {
+                broadcasting = !broadcasting;
+                if (broadcasting) {
+                    $("#broadcastButton").html("Stop Broadcasting");
+                    rtc.createStream({"video": true, "audio": true}, function(stream) {
+                        console.log("Broadcasting...");
+                        var video = document.createElement("video");
+                        video.id = "you";
+                        //video.src = URL.createObjectURL(stream);
+                        video.setAttribute("class", "flip");
+                        document.getElementById("video").appendChild(video);
+                        videos.push(video);
+                        rtc.attachStream(stream, video.id);
+                        resizeElements();
+                        video.play();
+                        rtc.addStreams();
+                        rtc.sendOffers();
+                    }, function(stream) {
+                        //rtc.fire('ready');
+                        console.log("createStream failed.");
+                        stream.stop();
+                    });
+                }
+                else {
+                    $("#broadcastButton").html("Start Broadcasting");
+                    removeVideo("you");
+                    for (var i = 0; i < rtc.streams.length; i++) {
+                        var stream = rtc.streams[i];
+                        console.log('Removing stream.');
+                        console.log(stream);
+                        for (var connection in rtc.peerConnections) {
+                            rtc.peerConnections[connection].removeStream(stream);
+                            rtc.sendOffer(connection);
+                        }
+                        stream.stop();
+                    }
+                    rtc.streams = [];
+                    resizeElements();
+                }
                 resizeElements();
             }
-            resizeElements();
-        }
-        
-        function sendMessage() {
-            $("#messageBox").val("");
-            return false;
-        }
-        
-        window.onresize = function(event) {
-            resizeElements();
-        }
-        
-      var websocketChat = {
-        send: function (message) {
-          rtc._socket.send(message);
-        },
-        recv: function (message) {
-          return message;
-        },
-        event: 'receive_chat_msg'
-      };
-      /*
-      var dataChannelChat = {
-        send: function (message) {
-          for (var connection in rtc.dataChannels) {
-            var channel = rtc.dataChannels[connection];
-            channel.send(message);
-          }
-        },
-        recv:  function (channel, message) {
-          return JSON.parse(message).data;
-        },
-        event: 'data stream data'
-      };
-      */
-      function initChat() {
-        var chat;
 
-        console.log('initializing websocket chat');
-        chat = websocketChat;
+            // TODO: this is??
+            function sendMessage() {
+                $("#messageBox").val("");
+                return false;
+            }
 
-        var input = document.getElementById("messageBox");
-        var room = 0;
-        var color = randomColor();
+            var websocketChat = {
+                send: function (message) {
+                    rtc._socket.send(message);
+                },
+                recv: function (message) {
+                    return message;
+                },
+                event: 'receive_chat_msg'
+            };
+            
+            /*
+            var dataChannelChat = {
+                send: function (message) {
+                    for (var connection in rtc.dataChannels) {
+                        var channel = rtc.dataChannels[connection];
+                        channel.send(message);
+                    }
+                },
+                recv:  function (channel, message) {
+                    return JSON.parse(message).data;
+                },
+                event: 'data stream data'
+            };
+            */
+            
+            function initChat() {
+                var chat;
 
-        input.addEventListener('keydown', function(event) {
-          var key = event.which || event.keyCode;
-          if (key === 13) {
-            if (input.value.trim() == "/color") {
-              color = randomColor();
-              chat.send(JSON.stringify({
-                "eventName": "chat_msg",
-                "data": {
-                  "type": "color",
-                  "username": username,
-                  "room": room,
-                  "color": color
+                console.log('initializing websocket chat');
+                chat = websocketChat;
+
+                var input = document.getElementById("messageBox");
+                var room = 0;
+                var color = randomColor();
+
+                input.addEventListener('keydown', function (event) {
+                    var key = event.which || event.keyCode;
+                    if (key === 13) {
+                        if (input.value.trim() == "/color") {
+                            color = randomColor();
+                            chat.send(JSON.stringify({
+                                "eventName": "chat_msg",
+                                "data": {
+                                    "type": "color",
+                                    "username": username,
+                                    "room": room,
+                                    "color": color
+                                }
+                            }));
+                            colors[username] = color;
+                            addToChat("color", "", "", color);
+                        }
+                        else if (input.value.slice(0, 4) == "/me ") {
+                            chat.send(JSON.stringify({
+                            "eventName": "chat_msg",
+                            "data": {
+                            "type": "pubemote",
+                            "messages": input.value.slice(4),
+                            "username": username,
+                            "room": room,
+                            "color": color
+                            }
+                            }));
+                            addToChat("pubemote", username, input.value, color);
+                        }
+                        else {
+                            chat.send(JSON.stringify({
+                                "eventName": "chat_msg",
+                                "data": {
+                                    "type": "pubmsg",
+                                    "messages": input.value,
+                                    "username": username,
+                                    "room": room,
+                                    "color": color
+                                }
+                            }));
+                            addToChat("pubmsg", username, input.value, color);
+                        }
+                        input.value = "";
+                    }
+                }, false);
+                rtc.on(chat.event, function () {
+                    var data = chat.recv.apply(this, arguments);
+                    //console.log(data.color);
+                    if (data.type == "join") {
+                        addToChat(data.type, data.username, "", data.color);
+                    } else if (data.type == "color") {
+                        colors[data.username] = data.color;
+                    } else if (data.type == "pubmsg") {
+                        addToChat(data.type, data.username, data.messages, data.color);
+                    if (!(data.username in colors))
+                        colors[username] = color;
+                    } else if (data.type == "pubemote") {
+                        addToChat(data.type, data.username, data.messages, data.color);
+                    }
+                });
+
+                setTimeout(function () {
+                    chat.send(JSON.stringify({
+                        "eventName": "chat_msg",
+                        "data": {
+                            "type": "join",
+                            //"messages": joinMsg,
+                            "username": username,
+                            "room": room,
+                            "color": color
+                        }
+                    }));
+                }, 500);
+                
+                colors[username] = color;
+                addToChat("join", username);
+            }
+
+            function addToChat(type, username, msg, color) {
+                var messages = document.getElementById('chatbox');
+                msg = sanitize(msg);
+                switch (type) {
+                    case 'join':
+                        msg = '<strong style="padding-left: 15px;">' + username + ' has joined the chat.</strong>';
+                        break;
+                    case 'color':
+                        msg = '<strong style="color: ' + color + '; padding-left: 15px;">Your color has been changed.</strong>';
+                        break;
+                    case 'pubmsg':
+                        msg = '<span style="color: ' + color + '; padding-left: 15px;">' + username + ': ' + msg + '</span>';
+                        break;
+                    case 'pubemote':
+                        msg = '<span style="color: ' + color + '; padding-left: 15px;">*' + username + " " + msg + '</span>';
+                        break;
                 }
-              }));
-              colors[username] = color;
-              addToChat("color", "", "", color);
+                messages.innerHTML = messages.innerHTML + msg + '<br>';
+                messages.scrollTop = 10000;
             }
-            else if (input.value.slice(0, 4) == "/me ") {
-              chat.send(JSON.stringify({
-                "eventName": "chat_msg",
-                "data": {
-                  "type": "pubemote",
-                  "messages": input.value.slice(4),
-                  "username": username,
-                  "room": room,
-                  "color": color
-                }
-              }));
-              addToChat("pubemote", username, input.value, color);
+
+            function randomColor() {
+                do {
+                    var red = ((1<<8)*Math.random()|0);
+                    var green = ((1<<8)*Math.random()|0);
+                    var blue = ((1<<8)*Math.random()|0);
+                    var intensity = 0.299 * red + 0.587 * green + 0.114 * blue;
+                    // Have to find a way to convert between hex format and .red, .green, .blue
+                } while (intensity > 128);
+                var color = (red<<16)+(green<<8)+blue;
+                return "#"+color.toString(16);
             }
-            else {
-              chat.send(JSON.stringify({
-                "eventName": "chat_msg",
-                "data": {
-                  "type": "pubmsg",
-                  "messages": input.value,
-                  "username": username,
-                  "room": room,
-                  "color": color
-                }
-              }));
-              addToChat("pubmsg", username, input.value, color);
+
+            function sanitize(msg) {
+                //return $("<div>").text(msg).html();
+                return msg;
             }
-            input.value = "";
-          }
-        }, false);
-        rtc.on(chat.event, function() {
-          var data = chat.recv.apply(this, arguments);
-          //console.log(data.color);
-          if (data.type == "join") {
-            addToChat(data.type, data.username, "", data.color);
-          } else if (data.type == "color") {
-            colors[data.username] = data.color;
-          } else if (data.type == "pubmsg") {
-            addToChat(data.type, data.username, data.messages, data.color);
-            if (!(data.username in colors))
-              colors[username] = color;
-          } else if (data.type == "pubemote") {
-            addToChat(data.type, data.username, data.messages, data.color);
-          }
-        });
-        
-        setTimeout(function() {
-          chat.send(JSON.stringify({
-            "eventName": "chat_msg",
-            "data": {
-              "type": "join",
-              //"messages": joinMsg,
-              "username": username,
-              "room": room,
-              "color": color
+            
+            window.onresize = function(event) {
+                resizeElements();
             }
-          })) }, 500);
-        colors[username] = color;
-        addToChat("join", username);
-      }
-      
-      function addToChat(type, username, msg, color) {
-        var messages = document.getElementById('chatbox');
-        msg = sanitize(msg);
-        switch (type) {
-          case 'join':
-            msg = '<strong style="padding-left: 15px;">' + username + ' has joined the chat.</strong>';
-            break;
-          case 'color':
-            msg = '<strong style="color: ' + color + '; padding-left: 15px;">Your color has been changed.</strong>';
-            break;
-          case 'pubmsg':
-            msg = '<span style="color: ' + color + '; padding-left: 15px;">' + username + ': ' + msg + '</span>';
-            break;
-          case 'pubemote':
-            msg = '<span style="color: ' + color + '; padding-left: 15px;">*' + username + " " + msg + '</span>';
-            break;
-        }
-        messages.innerHTML = messages.innerHTML + msg + '<br>';
-        messages.scrollTop = 10000;
-      }
-      
-      function randomColor() {
-        do {
-          var red = ((1<<8)*Math.random()|0);
-          var green = ((1<<8)*Math.random()|0);
-          var blue = ((1<<8)*Math.random()|0);
-          var intensity = 0.299 * red + 0.587 * green + 0.114 * blue;
-          // Have to find a way to convert between hex format and .red, .green, .blue
-        } while (intensity > 128);
-        var color = (red<<16)+(green<<8)+blue;
-        return "#"+color.toString(16);
-      }
-      
-      function sanitize(msg) {
-        //return $("<div/>").text(msg).html();
-        return msg;
-      }
-    </script> 
+        </script> 
     </body>
 </html>
-    
+
