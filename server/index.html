@@ -33,7 +33,7 @@
             var videos = [];
             var username = "guest";
             var broadcasting = false;
-            var users = [];
+            var users = {};
             var history = [];
             
             //var PeerConnection = window.PeerConnection || window.webkitPeerConnection00 || window.webkitRTCPeerConnection;
@@ -352,7 +352,7 @@
                 }
                 messages.innerHTML = messages.innerHTML + msg + '<br>';
                 messages.scrollTop = 100000;
-                if (message.scrollTop === 100000) {
+                if (messages.scrollTop === 100000) {
                     messages.removeChild(messages.firstChild);
                     messages.removeChild(messages.firstChild);
                     messages.scrollTop = 100000;
@@ -369,7 +369,7 @@
                     for (username in users) {
                         minDistance = Math.min(minDistance, Math.max(Math.abs(red-users[username].r), Math.abs(green-users[username].g), Math.abs(blue-users[username].b)));
                     }
-                } while (intensity > 128 || (minDistance < 32 && tries < 20));
+                } while (intensity > 96 || (minDistance < 32 && tries < 20));
                 var hex = '#'+((red<<16)+(green<<8)+blue).toString(16);
                 return {'r': red, 'g': green, 'b': blue, 'hex': hex};
             }
