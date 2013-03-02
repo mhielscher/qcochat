@@ -55,6 +55,16 @@ a:hover {
     font: 14px "Courier New", Monaco, monospace; 
 }
 
+#chatbox strong {
+    padding-left: 15px;
+    font-weight: bold;
+    white-space: pre;
+}
+
+#chatbox span {
+    padding-left: 15px;
+    white-space: pre;
+
 #messageForm {
     margin: 0;
     padding: 0;

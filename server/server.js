@@ -23,6 +23,8 @@ app.get('/webrtc.io.js', function(req, res) {
 });
 
 
+var users = {};
+
 webRTC.rtc.on('connect', function(rtc) {
   //Client connected
 });
@@ -36,6 +38,7 @@ webRTC.rtc.on('disconnect', function(rtc) {
 });
 
 webRTC.rtc.on('chat_msg', function(data, socket) {
+  console.log(data);
   var roomList = webRTC.rtc.rooms[data.room] || [];
 
   for (var i = 0; i < roomList.length; i++) {
@@ -60,5 +63,42 @@ webRTC.rtc.on('chat_msg', function(data, socket) {
         });
       }
     }
+  }
+  
+  // Update master userlist
+  if (data.type === "join") {
+    console.log(data.username + " joined.");
+    // Save master user list entry
+    users[data.username] = {'color': data.color};
+    
+    // Send user list to new user
+    var mySoc = webRTC.rtc.getSocket(socket.id);
+    for (un in users) {
+      if (un !== data.username) {
+        mySoc.send(JSON.stringify({
+          "eventName": "receive_chat_msg",
+          "data": {
+            "type": "join",
+            "username": un,
+            "messages": "",
+            "color": users[un].color
+          }
+        }), function(error) {
+          if (error) {
+            console.log(error);
+          }
+        });
+      }
+    }
+  }
+  else if (data.type === "color")
+    users[data.username].color = data.color;
+  else if (data.type === "nick") {
+    console.log("Before:");
+    console.log(users);
+    users[data.messages] = users[data.username];
+    delete users[data.username];
+    console.log("After:");
+    console.log(users);
   }
 });

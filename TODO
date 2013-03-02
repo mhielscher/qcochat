@@ -1,6 +1,6 @@
 √ Chat history (up arrow)
 - User list
-- /nick
+√ /nick
 - Audio stuttering issues
 - Video/audio optional
 - Video arrangement
@@ -11,3 +11,5 @@
 - Private messages
 - Labels over each stream
 - Deterministic video arrangement
+- Larger input text (serif too)
+- whitespace: pre
