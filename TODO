@@ -12,4 +12,8 @@
 - Labels over each stream
 - Deterministic video arrangement
 - Larger input text (serif too)
-- whitespace: pre
+√ whitespace: pre
+- validate usernames
+- account system
+- account preferences
+- unobtrusive JS (separate files too)
