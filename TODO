@@ -1,6 +1,8 @@
 √ Chat history (up arrow)
-- User list
 √ /nick
+√ whitespace: pre
+- See when users leave
+- User list
 - Audio stuttering issues
 - Video/audio optional
 - Video arrangement
@@ -12,8 +14,14 @@
 - Labels over each stream
 - Deterministic video arrangement
 - Larger input text (serif too)
-√ whitespace: pre
 - validate usernames
 - account system
 - account preferences
-- unobtrusive JS (separate files too)
+X unobtrusive JS (separate files too)
+- timestamps
+- video aspect ratios
+- audio gain
+- per-stream audio volume
+- chatbox resizes down as video pane slides open
+- auto-link URLs in chat
+- private audio streams

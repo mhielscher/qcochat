@@ -1,5 +1,5 @@
 var username = "guest";
-var scrollback = 10000 * 17; // scrolback lines * line height guess (revise later)
+var scrollback = 10000 * 17; // scrollback lines * line height guess (revise later)
 
 var videos = [];
 var broadcasting = false;
@@ -34,8 +34,10 @@ var dataChannelChat = {
 */
 
 function sanitize(msg) {
-    return $("<div>").text(msg).html();
-    //return msg;
+    if (msg)
+        return $("<div>").text(msg).html();
+    else
+        return msg;
 }
 
 function randomColor() {
@@ -55,27 +57,49 @@ function randomColor() {
 
 function resizeElements() {
     //$("#messageBox").width($("#chat").width() - $("#messageSubmit").outerWidth() - 6);
-    if (videos.length > 0)
-        $("#videoPane").show();
-    else
-        $("#videoPane").hide();
-    if ($("#videoPane").css("display") == "block") {
+    if (videos.length > 0) {
         $("#videoPane").height(Math.min(240, $(window).height()/2.5));
-        //console.log($('#video').height());
-        for (var i=0; i<videos.length; i++) {
-            videos[i].height($("#videoPane").innerHeight());
-            videos[i].width(1.333 * videos[i].height());
+        if (!$('#videoPane').is(':visible')) {
+            $("#videoPane").slideDown(400, function () {
+                for (var i=0; i<videos.length; i++) {
+                    videos[i].height($("#videoPane").innerHeight());
+                    videos[i].width(1.333 * videos[i].height());
+                    videos[i].fadeIn(200);
+                }
+                resizeElements();
+                scrollDown($('#chatbox'), true);
+            });
         }
     }
-    $("#chatbox").height($(window).height() - $("#chatbox").position().top - parseInt($("#chatbox").css('margin-bottom')) - $("#messageBox").height() - 48);
+    else if ($('#videoPane').is(':visible'))
+        $("#videoPane").slideUp(400, function () {
+            $("#chatbox").height($(window).height() - $("#chatbox").position().top - parseInt($("#chatbox").css('margin-bottom')) - $("#messageBox").height() - 48);
+            scrollDown($('#chatbox'), true);
+        });
+    
+    $('#chatbox').height($(window).height() - $("#chatbox").position().top - parseInt($("#chatbox").css('margin-bottom')) - $("#messageBox").height() - 48);
+    $('#userlist').height($('#chatbox').height());
 }
 
 function removeVideo(videoId) {
     var video = $('#'+videoId);
     if (video) {
-        video[0].src = null;
-        videos.splice(videos.indexOf(video), 1);
-        video.remove();
+        video.fadeOut(200, function() {
+            video[0].src = null;
+            videos.splice(videos.indexOf(video), 1);
+            video.remove();
+            resizeElements();
+        });
+    }
+}
+
+function scrollDown(field, force) {
+    if ((typeof force !== "undefined" && force) || (field.scrollTop() >= field[0].scrollHeight - field.height() - 56)) {
+        field.scrollTop(scrollback);
+        if (field.scrollTop() === scrollback) {
+            field.remove($(field.selector+' .chatmsg:first,br:first'));
+            field.scrollTop(scrollback);
+        }
     }
 }
 
@@ -89,6 +113,7 @@ function broadcast() {
             video.attr('id', 'you');
             video.attr("class", "flip");
             $('#videoPane').append(video);
+            video.hide();
             videos.push(video);
             rtc.attachStream(stream, video[0].id);
             resizeElements();
@@ -129,26 +154,33 @@ function addToChat(type, username, msg, color) {
         msg = sanitize(msg);
     switch (type) {
         case 'join':
-            msg = '<strong class="chatmsg" style="padding-left: 15px;">' + username + ' has joined the chat.</strong>';
+            msg = '<strong class="chatmsg">' + username + ' has joined the chat.</strong>';
             break;
         case 'color':
-            msg = '<strong class="chatmsg" style="color: ' + color + '; padding-left: 15px;">Your color has been changed.</strong>';
+            msg = '<strong class="chatmsg" style="color: ' + color + ';">Your color has been changed.</strong>';
             break;
         case 'nick':
-            msg = '<strong class="chatmsg" style="padding-left: 15px;">' + username + ' is now know as ' + msg + '</strong>';
+            msg = '<strong class="chatmsg">' + username + ' is now known as ' + msg + '</strong>';
             break;
         case 'pubmsg':
-            msg = '<span class="chatmsg" style="color: ' + color + '; padding-left: 15px;">' + username + ': ' + msg + '</span>';
+            msg = '<span class="chatmsg" style="color: ' + color + ';">' + username + ': ' + msg + '</span>';
             break;
         case 'pubemote':
-            msg = '<span class="chatmsg" style="color: ' + color + '; padding-left: 15px;">*' + username + " " + msg + '</span>';
+            msg = '<span class="chatmsg" style="color: ' + color + ';">*' + username + " " + msg + '</span>';
+            break;
+        case 'quit':
+            msg = '<strong class="chatmsg">' + username + ' has quit.</strong>';
             break;
     }
-    messages.append($(msg + '<br>'));
-    messages.scrollTop(scrollback);
-    if (messages.scrollTop() === scrollback) {
-        messages.remove($('#chatbox .chatmsg:first,br:first'));
-        messages.scrollTop(scrollback);
+    $(messages.selector+' p').append($(msg + '<br>'));
+    scrollDown(messages);
+}
+
+function rewriteUserlist() {
+    $('#userlist').html("<ul></ul>");
+    var userlist = $('#userlist ul');
+    for (un in users) {
+        userlist.append("<li>"+un+"</li>")
     }
 }
 
@@ -159,7 +191,7 @@ function initChat() {
     chat = websocketChat;
 
     var input = $('#messageBox');
-    var room = 0;
+    var room = "";
     var color = randomColor();
 
     input.keydown(function (event) {
@@ -199,6 +231,7 @@ function initChat() {
                 delete users[username];
                 console.log(users);
                 username = newUsername;
+                rewriteUserlist();
             }
             else if (input.val().slice(0, 4) === "/me ") {
                 chat.send(JSON.stringify({
@@ -257,14 +290,16 @@ function initChat() {
                 input.val(history[historyPosition]);
             }
         }
-    }, false);
+    });
     rtc.on(chat.event, function () {
+        console.log("Got chat");
         var data = chat.recv.apply(this, arguments);
         //console.log(data.color);
         switch (data.type) {
             case 'join':
                 addToChat(data.type, data.username);
-                users[data.username] = {'color': data.color};
+                users[data.username] = {'socketId': data.messages, 'color': data.color};
+                rewriteUserlist();
                 break;
             case 'color':
                 console.log(username);
@@ -274,6 +309,7 @@ function initChat() {
                 addToChat(data.type, data.username, data.messages, data.color.hex);
                 users[data.messages] = users[data.username];
                 delete users[data.username];
+                rewriteUserlist();
                 break;
             case 'pubmsg':
                 addToChat(data.type, data.username, data.messages, data.color.hex);
@@ -289,18 +325,19 @@ function initChat() {
             "eventName": "chat_msg",
             "data": {
                 "type": "join",
-                //"messages": joinMsg,
+                "messages": rtc._me,
                 "username": username,
                 "room": room,
                 "color": color
             }
         }));
-    }, 100);
+    }, 300);
     setTimeout(function () {
         addToChat("join", username);
     }, 500);
     
-    users[username] = {'color': color}
+    users[username].color = color;
+    rewriteUserlist();
 }
 
 function init() {
@@ -315,6 +352,7 @@ function init() {
         console.log("Adding remote stream...");
         var video = $('<video></video>');
         video.attr('id', "remote"+socketId);
+        video.hide();
         $('#videoPane').append(video);
         videos.push(video);
         rtc.attachStream(stream, video[0].id);
@@ -328,11 +366,23 @@ function init() {
         //rtc.sendOffer(socketId);
         resizeElements();
     });
+    rtc.on("remove_peer_connected", function (data) {
+        for (un in users) {
+            if (users[un].socketId === data.socketId) {
+                addToChat('quit', un);
+                delete users[un];
+                rewriteUserlist();
+            }
+        }
+    });
+    
+    users[username] = {}
 
     //console.log(rtc.initializedStreams +' ' + rtc.numStreams);
     console.log(rtc.connections);
     setTimeout(function () {
         rtc.fire('ready');
+        users[username].socketId = rtc._me;
     }, 500);
     //broadcast();
     //$("#video").show();
@@ -343,8 +393,8 @@ function do_login() {
     if (username == "")
         return false;
 
-    document.getElementById("loginFrame").style.display = "none";
-    document.getElementById("chatFrame").style.display = "block";
+    $('#loginFrame').fadeOut(400);
+    $('#chatFrame').fadeIn(400)
     $('#messageBox').attr('autofocus', '');
     resizeElements();
     init();

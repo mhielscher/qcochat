@@ -1,5 +1,5 @@
 body {
-    font: 12px Arial;
+    font: 12px Arial, sans-serif;
     color: #111111;
     padding: 10px 20px;
     background: #cccccc;
@@ -33,7 +33,7 @@ a:hover {
     width: auto;
     height: auto;
     border: 1px solid #000000;
-    background: #666666;
+    background: #555555;
     display: none;
 }
 
@@ -44,30 +44,44 @@ a:hover {
 
 #chatbox {
     text-align: left;
-    margin: 0 auto;
+    margin: 0 0;
     margin-bottom: 10px;
     padding: 10px;
     background: #ffffff;
     height: auto;
-    width: auto;
+    width: -webkit-calc(100% - 26px - 14em);
+    width: calc(100% - 26px - 14em);
     border: 1px solid #000000;
     overflow: auto;
-    font: 14px "Courier New", Monaco, monospace; 
+    font: 14px "Courier New", Monaco, monospace;
+    float: left;
 }
 
 #chatbox strong {
     padding-left: 15px;
     font-weight: bold;
     white-space: pre;
+    white-space: pre-wrap;
 }
 
 #chatbox span {
     padding-left: 15px;
     white-space: pre;
+    white-space: pre-wrap;
+}
 
-#messageForm {
-    margin: 0;
-    padding: 0;
+#userlist {
+    text-align: left;
+    width: 14em;
+    height: auto;
+    background: #ffffff;
+    border: 1px solid #000000;
+    overflow: auto;
+    font: 12px Arial, sans-serif;
+    padding: 10px;
+    margin: 0 0;
+    margin-bottom: 10px;
+    float: right;
 }
 
 #messageBox {
@@ -77,11 +91,7 @@ a:hover {
     margin-left: 0;
     border: 1px solid #000000;
     text-align: left;
-}
-
-#messageSubmit {
-    width: 60px;
-    border: 1px solid #000000;
+    clear: both;
 }
 
 .flip {

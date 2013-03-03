@@ -73,7 +73,7 @@ webRTC.rtc.on('chat_msg', function(data, socket) {
   if (data.type === "join") {
     console.log(data.username + " joined.");
     // Save master user list entry
-    users[data.username] = {'color': data.color};
+    users[data.username] = {'socketId': data.messages, 'color': data.color};
     
     // Send user list to new user
     var mySoc = webRTC.rtc.getSocket(socket.id);
@@ -84,7 +84,7 @@ webRTC.rtc.on('chat_msg', function(data, socket) {
           "data": {
             "type": "join",
             "username": un,
-            "messages": "",
+            "messages": users[un].socketId,
             "color": users[un].color
           }
         }), function(error) {
