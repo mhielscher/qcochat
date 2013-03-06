@@ -25,3 +25,6 @@ X unobtrusive JS (separate files too)
 - chatbox resizes down as video pane slides open
 - auto-link URLs in chat
 - private audio streams
+- chat hightlighting
+- tab completion
+
