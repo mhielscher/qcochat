@@ -84,6 +84,17 @@ a:hover {
     float: right;
 }
 
+#userlist ul {
+    padding-left: 10px;
+    font: 14px Arial, sans-serif;
+}
+
+#userlist li {
+    list-style-type: none;
+    padding-left: 0;
+    padding-bottom: 8px;
+}
+
 #messageBox {
     margin: 0;
     width: auto;

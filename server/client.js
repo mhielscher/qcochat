@@ -58,17 +58,63 @@ function randomColor() {
 function resizeElements() {
     //$("#messageBox").width($("#chat").width() - $("#messageSubmit").outerWidth() - 6);
     if (videos.length > 0) {
-        $("#videoPane").height(Math.min(240, $(window).height()/2.5));
+        var maxPaneHeight = Math.min(240, $(window).height()/2.5);
+        var paneHeight = maxPaneHeight;
+        $("#videoPane").height(maxPaneHeight);
         if (!$('#videoPane').is(':visible')) {
             $("#videoPane").slideDown(400, function () {
-                for (var i=0; i<videos.length; i++) {
-                    videos[i].height($("#videoPane").innerHeight());
-                    videos[i].width(1.333 * videos[i].height());
-                    videos[i].fadeIn(200);
-                }
                 resizeElements();
                 scrollDown($('#chatbox'), true);
             });
+        }
+        else {
+            var paneWidth = $('#videoPane').innerWidth();
+            // assume
+            var aspectRatio = 1.333;
+            var rows = 1;
+            var videoHeight = maxPaneHeight;
+            var videoWidth = Math.round(videoHeight * aspectRatio);
+            if (videoWidth * videos.length > paneWidth) {
+                videoWidth = Math.floor(paneWidth/videos.length);
+                videoHeight = Math.round(videoWidth/aspectRatio);
+                paneHeight = videoHeight;
+            }
+            //while (videoWidth * videos.length > paneWidth) {
+            while (paneHeight < maxPaneHeight/2) {
+                rows++;
+                videoHeight = Math.floor(maxPaneHeight/rows);
+                videoWidth = Math.round(videoHeight*aspectRatio);
+                paneHeight = maxPaneHeight;
+                console.log(videoWidth * videos.length);
+            }
+            
+            //var rows = Math.ceil(videoWidth * videos.length / $('#videoPane').innerWidth());
+            // how many videos in width
+            // max height within pane, pane shrinks to
+            // allow more videos widthwise
+            // unless it would shrink more than half, then
+            // there are two rows and pane doubles back in height
+            // in that case, evenly divide video rows with <br>
+            
+            $('#videoPane').height(paneHeight)
+            for (var i=0; i<videos.length; i++) {
+                videos[i].height(videoHeight);
+                videos[i].width(videoWidth);
+                videos[i].fadeIn(200);
+            }
+            if (rows > 1) {
+                //console.log(rows);
+                //console.log(videos.length);
+                if ($('#videoPane br'))
+                    $('#videoPane br').remove();
+                for (var i=1; i<rows; i++) {
+                    videos[Math.ceil(videos.length/rows)*i-1].after('<br/>');
+                    //console.log(Math.ceil(videos.length/rows)*i-1);
+                    //console.log(i);
+                }
+                //paneHeight = paneHeight*rows;
+                $('#videoPane').height(paneHeight);
+            }
         }
     }
     else if ($('#videoPane').is(':visible'))
@@ -418,3 +464,12 @@ $('#submitLogin').click(function (event) {
 });
 
 $('#broadcastButton').click(broadcast);
+
+
+function addTestVideo() {
+    var video = $('<video></video>');
+    video.css('background-color', randomColor().hex);
+    videos.push(video);
+    $('#videoPane').append(video);
+    resizeElements();
+}

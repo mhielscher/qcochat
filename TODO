@@ -1,7 +1,7 @@
 √ Chat history (up arrow)
 √ /nick
 √ whitespace: pre
-- See when users leave
+√ See when users leave
 - User list
 - Audio stuttering issues
 - Video/audio optional
@@ -17,7 +17,7 @@
 - validate usernames
 - account system
 - account preferences
-X unobtrusive JS (separate files too)
+- unobtrusive JS (separate files too)
 - timestamps
 - video aspect ratios
 - audio gain
@@ -25,6 +25,6 @@ X unobtrusive JS (separate files too)
 - chatbox resizes down as video pane slides open
 - auto-link URLs in chat
 - private audio streams
-- chat hightlighting
+- chat highlighting
 - tab completion
 
