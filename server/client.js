@@ -209,6 +209,16 @@ function addToChat(type, username, msg, color) {
             msg = '<strong class="chatmsg">' + username + ' is now known as ' + msg + '</strong>';
             break;
         case 'pubmsg':
+            var lastEmote = 0;
+            do {
+                var start = msg.indexOf('*', lastEmote);
+                var end = msg.indexOf('*', start+1);
+                if (end > lastEmote) {
+                    msg = msg.slice(0, start) + "<em>" + msg.slice(start, end+1) + "</em>" + msg.slice(end+1);
+                    lastEmote = end+5;
+                }
+                console.log(start, end);
+            } while (start > -1 && end > -1);
             msg = '<span class="chatmsg" style="color: ' + color + ';">' + username + ': ' + msg + '</span>';
             break;
         case 'pubemote':
@@ -237,7 +247,7 @@ function initChat() {
     chat = websocketChat;
 
     var input = $('#messageBox');
-    var room = "";
+    var room = window.location.path.slice(1);
     var color = randomColor();
 
     input.keydown(function (event) {
@@ -391,8 +401,8 @@ function init() {
         alert("Your browser is not supported or you must turn on flags. Go to chrome://flags and turn on Enable PeerConnection, then restart Chrome.");
     }
 
-    var room = "";
-    rtc.connect("ws:" + window.location.href.substring(window.location.protocol.length).split('#')[0], room);
+    var room = window.location.path.slice(1);
+    rtc.connect("ws://" + window.location.host, room);
 
     rtc.on('add remote stream', function (stream, socketId) {
         console.log("Adding remote stream...");
