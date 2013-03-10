@@ -51,14 +51,18 @@ function randomColor() {
             minDistance = Math.min(minDistance, Math.max(Math.abs(red-users[un].r), Math.abs(green-users[un].g), Math.abs(blue-users[un].b)));
         }
     } while (intensity > 96 || (minDistance < 32 && tries < 20));
-    var hex = '#'+((red<<16)+(green<<8)+blue).toString(16);
+    var hex = ((red<<16)+(green<<8)+blue).toString(16);
+    if (hex.length < 6)
+        hex = '#0'+hex;
+    else
+        hex = '#'+hex;
     return {'r': red, 'g': green, 'b': blue, 'hex': hex};
 }
 
 function resizeElements() {
     //$("#messageBox").width($("#chat").width() - $("#messageSubmit").outerWidth() - 6);
     if (videos.length > 0) {
-        var maxPaneHeight = Math.min(240, $(window).height()/2.5);
+        var maxPaneHeight = Math.max(240, $(window).height()/2.5);
         var paneHeight = maxPaneHeight;
         $("#videoPane").height(maxPaneHeight);
         if (!$('#videoPane').is(':visible')) {
@@ -71,30 +75,28 @@ function resizeElements() {
             var paneWidth = $('#videoPane').innerWidth();
             // assume
             var aspectRatio = 1.333;
+            var videoWidth = Math.round(paneHeight*aspectRatio);//videos[0].width();
             var rows = 1;
-            var videoHeight = maxPaneHeight;
-            var videoWidth = Math.round(videoHeight * aspectRatio);
-            if (videoWidth * videos.length > paneWidth) {
-                videoWidth = Math.floor(paneWidth/videos.length);
-                videoHeight = Math.round(videoWidth/aspectRatio);
-                paneHeight = videoHeight;
-            }
-            //while (videoWidth * videos.length > paneWidth) {
-            while (paneHeight < maxPaneHeight/2) {
+            while (videoWidth * Math.ceil(videos.length/rows) > paneWidth) {
                 rows++;
-                videoHeight = Math.floor(maxPaneHeight/rows);
-                videoWidth = Math.round(videoHeight*aspectRatio);
-                paneHeight = maxPaneHeight;
-                console.log(videoWidth * videos.length);
+                videoWidth = Math.round((paneHeight/rows)*aspectRatio);
             }
-            
-            //var rows = Math.ceil(videoWidth * videos.length / $('#videoPane').innerWidth());
-            // how many videos in width
-            // max height within pane, pane shrinks to
-            // allow more videos widthwise
-            // unless it would shrink more than half, then
-            // there are two rows and pane doubles back in height
-            // in that case, evenly divide video rows with <br>
+            console.log(videos.length+" videos, width="+videoWidth);
+            console.log("   in "+rows+" rows.");
+            var videoHeight = maxPaneHeight/rows;
+            videoWidth = Math.round(videoHeight * aspectRatio);
+            console.log("Changed videoHeight="+videoHeight+", videoWidth="+videoWidth);
+            if (rows > 1) {
+                var newVideoWidth = Math.floor(paneWidth/Math.ceil(videos.length/(rows-1)));
+                var newVideoHeight = Math.round(newVideoWidth/aspectRatio);
+                if (newVideoHeight > videoHeight) {
+                    videoHeight = newVideoHeight;
+                    videoWidth = newVideoWidth;
+                    rows--;
+                }
+                console.log("Reverted to 1 row, videoHeight="+videoHeight+", videoWidth="+videoWidth);
+                paneHeight = Math.round(videoHeight*rows);
+            }
             
             $('#videoPane').height(paneHeight)
             for (var i=0; i<videos.length; i++) {
@@ -102,6 +104,9 @@ function resizeElements() {
                 videos[i].width(videoWidth);
                 videos[i].fadeIn(200);
             }
+            
+            // Don't bother breaking manually - let them fill in naturally.
+            /*
             if (rows > 1) {
                 //console.log(rows);
                 //console.log(videos.length);
@@ -109,12 +114,12 @@ function resizeElements() {
                     $('#videoPane br').remove();
                 for (var i=1; i<rows; i++) {
                     videos[Math.ceil(videos.length/rows)*i-1].after('<br/>');
-                    //console.log(Math.ceil(videos.length/rows)*i-1);
+                    console.log("Placing <br> at "+(Math.ceil(videos.length/rows)*i-1));
                     //console.log(i);
                 }
                 //paneHeight = paneHeight*rows;
-                $('#videoPane').height(paneHeight);
-            }
+                //$('#videoPane').height(paneHeight);
+            }*/
         }
     }
     else if ($('#videoPane').is(':visible'))
@@ -247,7 +252,7 @@ function initChat() {
     chat = websocketChat;
 
     var input = $('#messageBox');
-    var room = window.location.path.slice(1);
+    var room = window.location.pathname.slice(1);
     var color = randomColor();
 
     input.keydown(function (event) {
@@ -401,7 +406,7 @@ function init() {
         alert("Your browser is not supported or you must turn on flags. Go to chrome://flags and turn on Enable PeerConnection, then restart Chrome.");
     }
 
-    var room = window.location.path.slice(1);
+    var room = window.location.pathname.slice(1);
     rtc.connect("ws://" + window.location.host, room);
 
     rtc.on('add remote stream', function (stream, socketId) {
@@ -478,7 +483,9 @@ $('#broadcastButton').click(broadcast);
 
 function addTestVideo() {
     var video = $('<video></video>');
-    video.css('background-color', randomColor().hex);
+    var c = randomColor();
+    //console.log(c)
+    video.css('background-color', c.hex);
     videos.push(video);
     $('#videoPane').append(video);
     resizeElements();

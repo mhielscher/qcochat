@@ -18,6 +18,11 @@ a:hover {
     text-decoration: underline;
 }
 
+video {
+    margin: 0;
+    padding: 0;
+}
+
 #loginFrame {
     text-align: center;
     margin: auto auto;
@@ -35,6 +40,7 @@ a:hover {
     border: 1px solid #000000;
     background: #555555;
     display: none;
+    line-height: 0;
 }
 
 #buttonBar {
