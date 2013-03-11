@@ -126,6 +126,7 @@ function resizeElements() {
         $("#videoPane").slideUp(400, function () {
             $("#chatbox").height($(window).height() - $("#chatbox").position().top - parseInt($("#chatbox").css('margin-bottom')) - $("#messageBox").height() - 48);
             scrollDown($('#chatbox'), true);
+            $('#userlist').height($('#chatbox').height());
         });
     
     $('#chatbox').height($(window).height() - $("#chatbox").position().top - parseInt($("#chatbox").css('margin-bottom')) - $("#messageBox").height() - 48);
