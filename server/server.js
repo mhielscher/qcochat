@@ -112,13 +112,13 @@ webRTC.rtc.on('chat_msg', function(data, socket) {
     }
   }
   else if (data.type === "color")
-    users[data.username].color = data.color;
+    users[data.room][data.username].color = data.color;
   else if (data.type === "nick") {
-    //console.log("Before:");
-    //console.log(users);
-    users[data.messages] = users[data.username];
-    delete users[data.username];
-    //console.log("After:");
-    //console.log(users);
+    console.log("Before:");
+    console.log(users);
+    users[data.room][data.messages] = users[data.room][data.username];
+    delete users[data.room][data.username];
+    console.log("After:");
+    console.log(users);
   }
 });

@@ -259,9 +259,7 @@ function initChat() {
         var key = event.which || event.keyCode;
         if (key === 13 && input.val().trim() !== "") {
             if (input.val().trim() == "/color") {
-                console.log(username);
                 color = randomColor();
-                console.log(username);
                 chat.send(JSON.stringify({
                     "eventName": "chat_msg",
                     "data": {
@@ -272,7 +270,6 @@ function initChat() {
                     }
                 }));
                 users[username].color = color;
-                console.log(username);
                 addToChat("color", "", "", color.hex);
             }
             else if (input.val().slice(0, 6) === "/nick ") {
@@ -290,7 +287,7 @@ function initChat() {
                 addToChat("nick", username, newUsername, color.hex);
                 users[newUsername] = users[username];
                 delete users[username];
-                console.log(users);
+                //console.log(users);
                 username = newUsername;
                 rewriteUserlist();
             }
@@ -320,7 +317,7 @@ function initChat() {
                 }));
                 addToChat("pubmsg", username, input.val(), color.hex);
             }
-            history[history.length-1] = input.val();
+            history[Math.max(0, history.length-1)] = input.val();
             historyPosition = history.length;
             history.push("");
             input.val("");
