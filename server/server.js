@@ -45,11 +45,11 @@ webRTC.rtc.on('disconnect', function(rtc) {
 });
 
 webRTC.rtc.on('room_leave', function(room, socketId) {
-  //console.log(socketId+' has left.');
-  for (un in users) {
-    //console.log(un+' is '+users[un].socketId);
-    if (users[un].socketId === socketId) {
-      delete users[un];
+  //console.log(socketId+' has left room '+room+'.');
+  for (un in users[room]) {
+    //console.log(un+' is '+users[room][un].socketId);
+    if (users[room][un].socketId === socketId) {
+      delete users[room][un];
       //console.log('Deleted user '+un+' ('+socketId+').');
     }
   }
@@ -87,19 +87,21 @@ webRTC.rtc.on('chat_msg', function(data, socket) {
   if (data.type === "join") {
     //console.log(data.username + " joined.");
     // Save master user list entry
-    users[data.username] = {'socketId': data.messages, 'color': data.color};
+    if (users[data.room] === undefined)
+        users[data.room] = {}
+    users[data.room][data.username] = {'socketId': data.messages, 'color': data.color};
     
     // Send user list to new user
     var mySoc = webRTC.rtc.getSocket(socket.id);
-    for (un in users) {
+    for (un in users[data.room]) {
       if (un !== data.username) {
         mySoc.send(JSON.stringify({
           "eventName": "receive_chat_msg",
           "data": {
             "type": "join",
             "username": un,
-            "messages": users[un].socketId,
-            "color": users[un].color
+            "messages": users[data.room][un].socketId,
+            "color": users[data.room][un].color
           }
         }), function(error) {
           if (error) {
