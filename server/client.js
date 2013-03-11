@@ -1,7 +1,6 @@
 var username = "guest";
 var scrollback = 10000 * 17; // scrollback lines * line height guess (revise later)
 
-var videos = [];
 var videoDivs = [];
 var backCanvases = [];
 var broadcasting = false;
@@ -42,6 +41,18 @@ function sanitize(msg) {
         return msg;
 }
 
+function getUsernameFromId(id) {
+    if (id === 'you')
+        return username
+    else if (id.slice(0,6) === "remote")
+        id = id.slice(6);
+    for (un in users) {
+        if (users[un].socketId === id)
+            return un;
+    }
+    return "<unknown>";
+}
+
 function randomColor() {
     do {
         var red = ((1<<8)*Math.random()|0);
@@ -63,7 +74,7 @@ function randomColor() {
 
 function resizeElements() {
     //$("#messageBox").width($("#chat").width() - $("#messageSubmit").outerWidth() - 6);
-    if (videos.length > 0) {
+    if (videoDivs.length > 0) {
         var maxPaneHeight = Math.max(240, Math.round($(window).height()/2.5));
         var paneHeight = maxPaneHeight;
         $("#videoPane").height(maxPaneHeight);
@@ -77,19 +88,19 @@ function resizeElements() {
             var paneWidth = $('#videoPane').innerWidth();
             // assume
             var aspectRatio = 1.333;
-            var videoWidth = Math.round(paneHeight*aspectRatio);//videos[0].width();
+            var videoWidth = Math.round(paneHeight*aspectRatio);
             var rows = 1;
-            while (videoWidth * Math.ceil(videos.length/rows) > paneWidth) {
+            while (videoWidth * Math.ceil(videoDivs.length/rows) > paneWidth) {
                 rows++;
                 videoWidth = Math.round((paneHeight/rows)*aspectRatio);
             }
-            console.log(videos.length+" videos, width="+videoWidth);
+            console.log(videoDivs.length+" videos, width="+videoWidth);
             console.log("   in "+rows+" rows.");
             var videoHeight = Math.floor(maxPaneHeight/rows);
             videoWidth = Math.round(videoHeight * aspectRatio);
             console.log("Changed videoHeight="+videoHeight+", videoWidth="+videoWidth);
             if (rows > 1) {
-                var newVideoWidth = Math.floor(paneWidth/Math.ceil(videos.length/(rows-1)));
+                var newVideoWidth = Math.floor(paneWidth/Math.ceil(videoDivs.length/(rows-1)));
                 var newVideoHeight = Math.round(newVideoWidth/aspectRatio);
                 if (newVideoHeight > videoHeight) {
                     videoHeight = newVideoHeight;
@@ -104,9 +115,18 @@ function resizeElements() {
             for (var i=0; i<videoDivs.length; i++) {
                 videoDivs[i].height(videoHeight);
                 videoDivs[i].children().height(videoHeight);
+                videoDivs[i].children().attr('height', videoHeight);
                 videoDivs[i].width(videoWidth);
                 videoDivs[i].children().width(videoWidth);
-                videoDivs[i].fadeIn(200);
+                videoDivs[i].children().attr('width', videoWidth);
+                if (!videoDivs[i].is(':visible')) {
+                    var fadedDiv = videoDivs[i];
+                    fadedDiv.fadeIn(200, function() {
+                        drawVideoOverlay(fadedDiv);
+                    });
+                }
+                else
+                    drawVideoOverlay(videoDivs[i]);
             }
             
             // Don't bother breaking manually - let them fill in naturally.
@@ -124,17 +144,6 @@ function resizeElements() {
                 //paneHeight = paneHeight*rows;
                 //$('#videoPane').height(paneHeight);
             }*/
-            
-            var canvas = $('#you canvas');
-            var video = $('#you video');
-            //canvas.offset(video.offset());
-            canvas.attr('height', video.height());
-            canvas.attr('width', video.width());
-            var context = canvas.get()[0].getContext("2d");
-            context.strokeStyle = "#ffffff";
-            context.font = '16px Courier';
-            context.textBaseline = 'top';
-            context.strokeText(username, 5, 2);
         }
     }
     else if ($('#videoPane').is(':visible'))
@@ -148,16 +157,46 @@ function resizeElements() {
     $('#userlist').height($('#chatbox').height());
 }
 
-function attachStream(stream, element) {
-    element.src = URL.createObjectURL(stream);
+function drawVideoOverlay(div) {
+    var context = div.children('canvas').get()[0].getContext("2d");
+    context.strokeStyle = "#ffffff";
+    context.font = '16px Courier';
+    context.textBaseline = 'top';
+    context.strokeText(getUsernameFromId(div.attr('id')), 5, 2);
+    console.log("Drew overlay.");
 }
 
-function removeVideo(videoId) {
-    var video = $('#'+videoId);
-    if (video) {
-        video.fadeOut(200, function() {
+function createVideoBlock(id, stream) {
+    var div = $('<div></div>');
+    div.attr('id', id);
+    div.attr('class', 'videoBlock');
+    div.hide();
+    var video = $('<video></video>');
+    video.css('position', 'absolute');
+    video.offset({top: 0, left: 0});
+    var canvas = $('<canvas></canvas>');
+    canvas.css('position', 'absolute');
+    canvas.offset({top: 0, left: 0});
+    div.append(video);
+    div.append(canvas);
+    $('#videoPane').append(div);
+    videoDivs.push(div);
+    attachStream(stream, video[0]);
+    return div;
+}
+
+function attachStream(stream, element) {
+    if (stream)
+        element.src = URL.createObjectURL(stream);
+}
+
+function removeVideo(id) {
+    var div = $('#'+id);
+    if (div) {
+        div.fadeOut(200, function() {
+            var video = div.children('video');
             video[0].src = null;
-            videos.splice(videos.indexOf(video), 1);
+            videoDivs.splice(videoDivs.indexOf(div), 1);
             video.remove();
             resizeElements();
         });
@@ -180,28 +219,10 @@ function broadcast() {
         $("#broadcastButton").html("Stop Broadcasting");
         rtc.createStream({"video": true, "audio": true}, function(stream) {
             console.log("Broadcasting...");
-            var div = $('<div></div>');
-            div.attr('id', 'you');
-            div.attr('class', 'videoBlock');
-            div.hide();
-            var video = $('<video></video>');
-            video.attr("class", "flip");
-            video.css('position', 'absolute');
-            video.offset({top: 0, left: 0});
-            //video.hide();
-            videos.push(video);
-            var canvas = $('<canvas></canvas>');
-            canvas.css('position', 'absolute');
-            canvas.offset({top: 0, left: 0});
-            //canvas.offset(video.offset());
-            //canvas.height(video.height());
-            //canvas.width(video.width());
-            div.append(video);
-            div.append(canvas);
-            $('#videoPane').append(div);
-            videoDivs.push(div);
+            var div = createVideoBlock('you', stream);
+            var video = div.children('video')
+            video.attr('class', 'flip');
             console.log(video[0]);
-            attachStream(stream, video[0]);
             resizeElements();
             video[0].play();
             rtc.addStreams();
@@ -443,15 +464,9 @@ function init() {
 
     rtc.on('add remote stream', function (stream, socketId) {
         console.log("Adding remote stream...");
-        var video = $('<video></video>');
-        video.attr('id', "remote"+socketId);
-        video.hide();
-        $('#videoPane').append(video);
-        videos.push(video);
-        attachStream(stream, video[0]);
+        var div = createVideoBlock('remote'+socketId, stream);
         resizeElements();
-        //rtc.attachStream(stream, video.id);
-        video[0].play();
+        div.children('video')[0].play();
     });
     rtc.on("disconnect stream", function (socketId) {
         console.log("Removing "+socketId);
@@ -514,11 +529,9 @@ $('#broadcastButton').click(broadcast);
 
 
 function addTestVideo() {
-    var video = $('<video></video>');
+    var div = createVideoBlock(((1<<24)*Math.random()|0).toString(16));
     var c = randomColor();
     //console.log(c)
-    video.css('background-color', c.hex);
-    videos.push(video);
-    $('#videoPane').append(video);
+    div.children('video').css('background-color', c.hex);
     resizeElements();
 }
