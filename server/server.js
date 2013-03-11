@@ -26,6 +26,10 @@ app.get('/client.js', function(req, res) {
   res.sendfile(__dirname + '/client.js');
 });
 
+app.get('/*', function(req, res) {
+  res.sendfile(__dirname + '/index.html');
+});
+
 var users = {};
 
 webRTC.rtc.on('connect', function(rtc) {
