@@ -128,22 +128,6 @@ function resizeElements() {
                 else
                     drawVideoOverlay(videoDivs[i]);
             }
-            
-            // Don't bother breaking manually - let them fill in naturally.
-            /*
-            if (rows > 1) {
-                //console.log(rows);
-                //console.log(videos.length);
-                if ($('#videoPane br'))
-                    $('#videoPane br').remove();
-                for (var i=1; i<rows; i++) {
-                    videos[Math.ceil(videos.length/rows)*i-1].after('<br/>');
-                    console.log("Placing <br> at "+(Math.ceil(videos.length/rows)*i-1));
-                    //console.log(i);
-                }
-                //paneHeight = paneHeight*rows;
-                //$('#videoPane').height(paneHeight);
-            }*/
         }
     }
     else if ($('#videoPane').is(':visible'))
@@ -163,7 +147,7 @@ function drawVideoOverlay(div) {
     context.font = '16px Courier';
     context.textBaseline = 'top';
     context.strokeText(getUsernameFromId(div.attr('id')), 5, 2);
-    console.log("Drew overlay.");
+    //console.log("Drew overlay.");
 }
 
 function createVideoBlock(id, stream) {
@@ -182,6 +166,24 @@ function createVideoBlock(id, stream) {
     $('#videoPane').append(div);
     videoDivs.push(div);
     attachStream(stream, video[0]);
+    /*
+    div.mousedown(function(event) {
+        if (event.which === 3) { // Right-click
+            video.trigger({
+                type: 'mousedown',
+                which: 3
+            });
+        }
+    });
+    div.mouseup(function(event) {
+        if (event.which === 3) {
+            video.trigger({
+                type: 'mouseup',
+                which: 3
+            });
+        }
+    });
+    */
     return div;
 }
 
