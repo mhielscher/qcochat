@@ -166,6 +166,18 @@ function createVideoBlock(id, stream) {
     $('#videoPane').append(div);
     videoDivs.push(div);
     attachStream(stream, video[0]);
+    div.mouseenter(function(event) {
+        console.log("mouse in");
+        var context = canvas.get()[0].getContext("2d");
+        context.fillStyle = '#00f';
+        context.fillRect(canvas.width()-25, canvas.height()-25, 20, 20);
+    });
+    div.mouseleave(function(event) {
+        console.log("mouseout");
+        var context = canvas.get()[0].getContext("2d");
+        context.clearRect(canvas.width()-25, canvas.height()-25, 20, 20);
+        console.log((canvas.width()-25)+", "+(canvas.hight()-25)); 
+    });
     /*
     div.mousedown(function(event) {
         if (event.which === 3) { // Right-click
