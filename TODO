@@ -11,7 +11,7 @@
 - Per-stream volume/mute
 - Chat message sounds
 - Private messages
-- Labels over each stream
+√ Labels over each stream
 - Deterministic video arrangement
 - Larger input text (serif too)
 - validate usernames
