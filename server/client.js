@@ -166,7 +166,9 @@ function createVideoBlock(id, stream) {
     $('#videoPane').append(div);
     videoDivs.push(div);
     attachStream(stream, video[0]);
-    createVideoMenu(div);
+    setTimeout(function () {
+        createVideoMenu(div);
+    }, 500);
     /*
     div.mousedown(function(event) {
         if (event.which === 3) { // Right-click
@@ -190,47 +192,47 @@ function createVideoBlock(id, stream) {
 
 function createVideoMenu(div) {
     var canvas = div.children('canvas');
+    var canvasElement = canvas.get()[0];
+    var buttonLoc = {top: div.height()-25, left: div.width()-25, width: 20, height: 20};
+    var menu = createContextMenu(div, buttonLoc.left, buttonLoc.top);
     div.mouseenter(function(event) {
         console.log("mouse in");
-        var canvas = div.children('canvas').get()[0];
-        var buttonLoc = {top: canvas.height-25, left: canvas.width-25, width: 20, height: 20};
-        console.log(canvas);
-        var context = canvas.getContext("2d");
+        var context = canvasElement.getContext("2d");
         context.fillStyle = '#fff';
         context.fillRect(buttonLoc.left, buttonLoc.top, buttonLoc.width, buttonLoc.height);
     });
     div.mouseleave(function(event) {
         console.log("mouseout");
-        var canvas = div.children('canvas').get()[0];
-        var buttonLoc = {top: canvas.height-25, left: canvas.width-25, width: 20, height: 20};
-        var context = canvas.getContext("2d");
+        var context = canvasElement.getContext("2d");
         context.clearRect(buttonLoc.left, buttonLoc.top, buttonLoc.width, buttonLoc.height);
         console.log(buttonLoc.top+", "+buttonLoc.left); 
     });
     div.mousemove(function(event) {
-        var canvas = div.children('canvas').get()[0];
-        var buttonLoc = {top: canvas.height-25, left: canvas.width-25, width: 20, height: 20};
-        var x = event.pageX - $(canvas).offset().left;
-        var y = event.pageY - $(canvas).offset().top;
+        var x = event.pageX - canvas.offset().left;
+        var y = event.pageY - canvas.offset().top;
         //console.log("mousemove ("+x+","+y+")");
         //console.log(buttonLoc);
         if (x > buttonLoc.left && x < buttonLoc.left+buttonLoc.width &&
             y > buttonLoc.top && y < buttonLoc.top+buttonLoc.height)
-                createContextMenu(div, x, y);
+                menu.slideDown(150);
+    });
+    menu.mouseleave(function(event) {
+        menu.slideUp(150);
     });
 }
 
 function createContextMenu(div, x, y) {
-    if (div.children('.contextMenu').length === 0) {
+    var menu = div.children('.contextMenu');
+    if (menu.length === 0) {
         console.log("Creating context menu.");
-        var menu = $('.contextMenu').clone();
+        menu = $('.contextMenu').clone();
         menu.offset({left: x, top: y});
         menu.attr('name', div.attr('id'));
         div.append(menu);
-        menu.slideDown(200);
-        //menu.show();
+        menu.hide();
         console.log(div);
     }
+    return menu;
 }
 
 function attachStream(stream, element) {
