@@ -1,11 +1,14 @@
-√ Chat history (up arrow)
-√ /nick
-√ whitespace: pre
-√ See when users leave
-√ User list (per room!)
+TODO
+====
+
+Bugs
+----
+- URLs do not open in new window
+
+Features
+--------
 - Audio stuttering issues
 - Video/audio optional
-√ Video arrangement
 - Fullscreen
 - Push-to-talk
 - Per-stream volume/mute
@@ -23,8 +26,17 @@
 - audio gain
 - per-stream audio volume
 - chatbox resizes down as video pane slides open
-- auto-link URLs in chat
 - private audio streams
 - chat highlighting
 - tab completion
+
+Complete
+--------
+√ Chat history (up arrow)
+√ /nick
+√ whitespace: pre
+√ See when users leave
+√ User list (per room!)
+√ Video arrangement
+√ auto-link URLs in chat
 
