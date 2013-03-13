@@ -227,8 +227,8 @@ function createContextMenu(div, x, y) {
         menu.offset({left: x, top: y});
         menu.attr('name', div.attr('id'));
         div.append(menu);
-        //menu.slideDown(150);
-        menu.show();
+        menu.slideDown(200);
+        //menu.show();
         console.log(div);
     }
 }

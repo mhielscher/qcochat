@@ -144,6 +144,13 @@ video {
     border-bottom: 1px solid gray;
 }
 
+.contextMenu li.header {
+    padding: 3px 10px 5px 10px;
+    border-bottom: 1px solid gray;
+    font-weight: bold;
+    font-size: 95%;
+}
+
 .contextMenu li.disabled {
     color: #999999;
 }
