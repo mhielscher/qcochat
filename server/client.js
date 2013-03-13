@@ -114,11 +114,11 @@ function resizeElements() {
             $('#videoPane').height(paneHeight)
             for (var i=0; i<videoDivs.length; i++) {
                 videoDivs[i].height(videoHeight);
-                videoDivs[i].children().height(videoHeight);
-                videoDivs[i].children().attr('height', videoHeight);
+                videoDivs[i].children('video, canvas').height(videoHeight);
+                videoDivs[i].children('video, canvas').attr('height', videoHeight);
                 videoDivs[i].width(videoWidth);
-                videoDivs[i].children().width(videoWidth);
-                videoDivs[i].children().attr('width', videoWidth);
+                videoDivs[i].children('video, canvas').width(videoWidth);
+                videoDivs[i].children('video, canvas').attr('width', videoWidth);
                 if (!videoDivs[i].is(':visible')) {
                     var fadedDiv = videoDivs[i];
                     fadedDiv.fadeIn(200, function() {
@@ -166,18 +166,7 @@ function createVideoBlock(id, stream) {
     $('#videoPane').append(div);
     videoDivs.push(div);
     attachStream(stream, video[0]);
-    div.mouseenter(function(event) {
-        console.log("mouse in");
-        var context = canvas.get()[0].getContext("2d");
-        context.fillStyle = '#00f';
-        context.fillRect(canvas.width()-25, canvas.height()-25, 20, 20);
-    });
-    div.mouseleave(function(event) {
-        console.log("mouseout");
-        var context = canvas.get()[0].getContext("2d");
-        context.clearRect(canvas.width()-25, canvas.height()-25, 20, 20);
-        console.log((canvas.width()-25)+", "+(canvas.hight()-25)); 
-    });
+    createVideoMenu(div);
     /*
     div.mousedown(function(event) {
         if (event.which === 3) { // Right-click
@@ -197,6 +186,51 @@ function createVideoBlock(id, stream) {
     });
     */
     return div;
+}
+
+function createVideoMenu(div) {
+    var canvas = div.children('canvas');
+    div.mouseenter(function(event) {
+        console.log("mouse in");
+        var canvas = div.children('canvas').get()[0];
+        var buttonLoc = {top: canvas.height-25, left: canvas.width-25, width: 20, height: 20};
+        console.log(canvas);
+        var context = canvas.getContext("2d");
+        context.fillStyle = '#fff';
+        context.fillRect(buttonLoc.left, buttonLoc.top, buttonLoc.width, buttonLoc.height);
+    });
+    div.mouseleave(function(event) {
+        console.log("mouseout");
+        var canvas = div.children('canvas').get()[0];
+        var buttonLoc = {top: canvas.height-25, left: canvas.width-25, width: 20, height: 20};
+        var context = canvas.getContext("2d");
+        context.clearRect(buttonLoc.left, buttonLoc.top, buttonLoc.width, buttonLoc.height);
+        console.log(buttonLoc.top+", "+buttonLoc.left); 
+    });
+    div.mousemove(function(event) {
+        var canvas = div.children('canvas').get()[0];
+        var buttonLoc = {top: canvas.height-25, left: canvas.width-25, width: 20, height: 20};
+        var x = event.pageX - $(canvas).offset().left;
+        var y = event.pageY - $(canvas).offset().top;
+        //console.log("mousemove ("+x+","+y+")");
+        //console.log(buttonLoc);
+        if (x > buttonLoc.left && x < buttonLoc.left+buttonLoc.width &&
+            y > buttonLoc.top && y < buttonLoc.top+buttonLoc.height)
+                createContextMenu(div, x, y);
+    });
+}
+
+function createContextMenu(div, x, y) {
+    if (div.children('.contextMenu').length === 0) {
+        console.log("Creating context menu.");
+        var menu = $('.contextMenu').clone();
+        menu.offset({left: x, top: y});
+        menu.attr('name', div.attr('id'));
+        div.append(menu);
+        //menu.slideDown(150);
+        menu.show();
+        console.log(div);
+    }
 }
 
 function attachStream(stream, element) {

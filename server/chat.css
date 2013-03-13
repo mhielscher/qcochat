@@ -118,6 +118,40 @@ video {
     clear: both;
 }
 
+#resources {
+    display: none;
+}
+
+.contextMenu {
+    display: block;
+    border: 1px solid black;
+    background: #eeeeee;
+    color: #111111;
+    position: absolute;
+    text-align: left;
+    padding: 0;
+}
+
+.contextMenu ul {
+    font: 14px Arial, sans-serif;
+    padding: 0;
+    margin: 0;
+}
+
+.contextMenu li {
+    list-style-type: none;
+    padding: 4px 10px 4px 10px;
+    border-bottom: 1px solid gray;
+}
+
+.contextMenu li.disabled {
+    color: #999999;
+}
+
+.contextMenu li:last-child {
+    border-bottom: none;
+}
+
 .flip {
 -webkit-transform: rotateY(180deg);
 }
