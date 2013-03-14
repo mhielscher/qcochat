@@ -216,9 +216,35 @@ function createVideoMenu(div) {
             y > buttonLoc.top && y < buttonLoc.top+buttonLoc.height)
                 menu.slideDown(150);
     });
+    
     menu.mouseleave(function(event) {
         menu.slideUp(150);
     });
+    var options = menu.children('ul').children('li');
+    for (var i=1; i<options.length; i++) { // Skip header
+        if ($(options[i]).attr('class') !== 'disabled') {
+            switch ($(options[i]).text()) {
+                case "Maximize":
+                    // To be implemented
+                    break;
+                case "Hide video":
+                    $(options[i]).click(function () {
+                        div.children('video').hide();
+                        console.log("Clicked hide.");
+                    });
+                    break;
+                case "Mute":
+                    $(options[i]).click(function () {
+                        div.children('video').attr('muted', 'true');
+                        console.log("Clicked mute.");
+                    });
+                    break;
+                case "Profile":
+                    // To be implemented
+                    break;
+            }
+        }
+    }
 }
 
 function createContextMenu(div, x, y) {
