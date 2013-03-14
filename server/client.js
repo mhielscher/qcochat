@@ -202,7 +202,7 @@ function broadcast() {
 
 function makeURLsClickable(text) {
     var regex = /(\b(https?|ftp|file):\/\/[-A-Z0-9+&@#\/%?=~_|!:,.;]*[-A-Z0-9+&@#\/%=~_|])/ig;
-    text = text.replace(regex, '<a href="$1">$1</a>');
+    text = text.replace(regex, '<a href="$1" target="_blank">$1</a>');
     if (text.slice(0,1) === "(" && text.slice(-1) === ")")
         return text.substring(1, text.length - 1);
     else
