@@ -229,13 +229,21 @@ function createVideoMenu(div) {
                     break;
                 case "Hide video":
                     $(options[i]).click(function () {
-                        div.children('video').hide();
+                        var video = div.children('video');
+                        if (video.is(':visible'))
+                            video.hide();
+                        else
+                            video.show();
                         console.log("Clicked hide.");
                     });
                     break;
                 case "Mute":
                     $(options[i]).click(function () {
-                        div.children('video').attr('muted', 'true');
+                        var video = div.children('video');
+                        if (video.attr('muted') === 'true')
+                            video.attr('muted', 'false');
+                        else
+                            video.attr('muted', 'true');
                         console.log("Clicked mute.");
                     });
                     break;
