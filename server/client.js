@@ -472,9 +472,9 @@ function do_login() {
     return false;
 }
 
-window.onresize = function (event) {
+$(window).resize(function (event) {
     resizeElements();
-}
+});
 
 $('#usernameField').keypress(function (event) {
     var key = event.which || event.keyCode;
