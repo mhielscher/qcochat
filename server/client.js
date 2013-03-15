@@ -339,10 +339,21 @@ function broadcast() {
     }
 }
 
+function makeURLsClickable(text) {
+    var regex = /(\b(https?|ftp|file):\/\/[-A-Z0-9+&@#\/%?=~_|!:,.;]*[-A-Z0-9+&@#\/%=~_|])/ig;
+    text = text.replace(regex, '<a href="$1" target="_blank">$1</a>');
+    if (text.slice(0,1) === "(" && text.slice(-1) === ")")
+        return text.substring(1, text.length - 1);
+    else
+        return text;
+}
+
 function addToChat(type, username, msg, color) {
     var messages = $('#chatbox');
-    if (msg)
+    if (msg) {
         msg = sanitize(msg);
+        msg = makeURLsClickable(msg);
+    }
     switch (type) {
         case 'join':
             msg = '<strong class="chatmsg">' + username + ' has joined the chat.</strong>';
@@ -362,7 +373,7 @@ function addToChat(type, username, msg, color) {
                     msg = msg.slice(0, start) + "<em>" + msg.slice(start, end+1) + "</em>" + msg.slice(end+1);
                     lastEmote = end+5;
                 }
-                console.log(start, end);
+                //console.log(start, end);
             } while (start > -1 && end > -1);
             msg = '<span class="chatmsg" style="color: ' + color + ';">' + username + ': ' + msg + '</span>';
             break;
@@ -594,9 +605,9 @@ function do_login() {
     return false;
 }
 
-window.onresize = function (event) {
+$(window).resize(function (event) {
     resizeElements();
-}
+});
 
 $('#usernameField').keypress(function (event) {
     var key = event.which || event.keyCode;
