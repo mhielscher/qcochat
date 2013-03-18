@@ -6,25 +6,29 @@ server.listen(8000);
 
 console.log(__dirname);
 
-app.get('/', function(req, res) {
+app.get('/', function (req, res) {
   res.sendfile(__dirname + '/index.html');
 });
 
-app.get('/normalize.min.css', function(req, res) {
-  res.sendfile(__dirname + '/normalize.min.css');
+app.get('/css/normalize.min.css', function (req, res) {
+  res.sendfile(__dirname + '/css/normalize.min.css');
 });
 
-app.get('/chat.css', function(req, res) {
-  res.sendfile(__dirname + '/chat.css');
+app.get('/css/chat.css', function (req, res) {
+  res.sendfile(__dirname + '/css/chat.css');
 });
 
-app.get('/webrtc.io.js', function(req, res) {
+app.get('/webrtc.io.js', function (req, res) {
   res.sendfile(__dirname + '/webrtc.io.js');
 });
 
-app.get('/client.js', function(req, res) {
+app.get('/client.js', function (req, res) {
   res.sendfile(__dirname + '/client.js');
 });
+
+app.get('/img/arrow_down.png', function (req, res) {
+  res.sendfile(__dirname + '/img/arrow_down.png');
+}
 
 app.get('/*', function(req, res) {
   res.sendfile(__dirname + '/index.html');
