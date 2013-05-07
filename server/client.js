@@ -119,6 +119,7 @@ function resizeElements() {
                 videoDivs[i].width(videoWidth);
                 videoDivs[i].children('video, canvas').width(videoWidth);
                 videoDivs[i].children('video, canvas').attr('width', videoWidth);
+                positionContextMenu(videoDivs[i]);
                 if (!videoDivs[i].is(':visible')) {
                     var fadedDiv = videoDivs[i];
                     fadedDiv.fadeIn(200, function() {
@@ -193,28 +194,33 @@ function createVideoBlock(id, stream) {
 function createVideoMenu(div) {
     var canvas = div.children('canvas');
     var canvasElement = canvas.get()[0];
-    var buttonLoc = {top: div.height()-25, left: div.width()-25, width: 20, height: 20};
-    var menu = createContextMenu(div, buttonLoc.left, buttonLoc.top);
+    var buttonLoc = function () { return {top: div.height()-25, left: div.width()-25, width: 20, height: 20} };
+    var menu = createContextMenu(div);
+    var arrowImage = new Image();
+    arrowImage.src = 'img/arrow_down.png';
     div.mouseenter(function(event) {
         console.log("mouse in");
         var context = canvasElement.getContext("2d");
         context.fillStyle = '#fff';
-        context.fillRect(buttonLoc.left, buttonLoc.top, buttonLoc.width, buttonLoc.height);
+        //context.fillRect(buttonLoc.left, buttonLoc.top, buttonLoc.width, buttonLoc.height);
+        context.drawImage(arrowImage, buttonLoc().left, buttonLoc().top, buttonLoc().width, buttonLoc().height);
     });
     div.mouseleave(function(event) {
         console.log("mouseout");
         var context = canvasElement.getContext("2d");
-        context.clearRect(buttonLoc.left, buttonLoc.top, buttonLoc.width, buttonLoc.height);
-        console.log(buttonLoc.top+", "+buttonLoc.left); 
+        context.clearRect(buttonLoc().left, buttonLoc().top, buttonLoc().width, buttonLoc().height);
+        console.log(buttonLoc().top+", "+buttonLoc().left); 
     });
     div.mousemove(function(event) {
         var x = event.pageX - canvas.offset().left;
         var y = event.pageY - canvas.offset().top;
         //console.log("mousemove ("+x+","+y+")");
         //console.log(buttonLoc);
-        if (x > buttonLoc.left && x < buttonLoc.left+buttonLoc.width &&
-            y > buttonLoc.top && y < buttonLoc.top+buttonLoc.height)
+        if (x > buttonLoc().left && x < buttonLoc().left+buttonLoc().width &&
+            y > buttonLoc().top && y < buttonLoc().top+buttonLoc().height) {
                 menu.slideDown(150);
+                console.log("Mouse in button." + buttonLoc())
+        }
     });
     
     menu.mouseleave(function(event) {
@@ -247,18 +253,30 @@ function createVideoMenu(div) {
     }
 }
 
-function createContextMenu(div, x, y) {
+function createContextMenu(div) {
     var menu = div.children('.contextMenu');
     if (menu.length === 0) {
         console.log("Creating context menu.");
-        menu = $('.contextMenu').clone();
-        menu.offset({left: x, top: y});
+        menu = $('#resources .contextMenu').clone();
         menu.attr('name', div.attr('id'));
         div.append(menu);
         menu.hide();
         console.log(div);
+        positionContextMenu(div);
     }
     return menu;
+}
+
+function positionContextMenu(div) {
+    var menu = div.children('.contextMenu');
+    var menuX = div.width() - menu.width() - 4;
+    console.log($(window).width());
+    console.log(div.offset().left);
+    if (menuX + div.offset().left >= $(window).width())
+        menuX = div.width()-menu.width()-1;
+    console.log(menuX);
+    menu.offset({left: menuX, top: div.height()-25});
+    console.log(div);
 }
 
 function attachStream(stream, element) {

@@ -28,7 +28,7 @@ app.get('/client.js', function (req, res) {
 
 app.get('/img/arrow_down.png', function (req, res) {
   res.sendfile(__dirname + '/img/arrow_down.png');
-}
+});
 
 app.get('/*', function(req, res) {
   res.sendfile(__dirname + '/index.html');
