@@ -1,17 +1,12 @@
-√ Chat history (up arrow)
-√ /nick
-√ whitespace: pre
-√ See when users leave
-√ User list (per room!)
+To Do
+-----
 - Audio stuttering issues
 - Video/audio optional
-√ Video arrangement
 - Fullscreen
 - Push-to-talk
 - Per-stream volume/mute
 - Chat message sounds
 - Private messages
-√ Labels over each stream
 - Deterministic video arrangement
 - Larger input text (serif too)
 - validate usernames
@@ -28,3 +23,12 @@
 - chat highlighting
 - tab completion
 
+To Done
+-------
+√ Chat history (up arrow)
+√ /nick
+√ whitespace: pre
+√ See when users leave
+√ User list (per room!)
+√ Video arrangement
+√ Labels over each stream

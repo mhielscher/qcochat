@@ -195,7 +195,7 @@ function createVideoMenu(div) {
     var canvas = div.children('canvas');
     var canvasElement = canvas.get()[0];
     var buttonLoc = function () { return {top: div.height()-25, left: div.width()-25, width: 20, height: 20} };
-    var menu = createContextMenu(div);
+    //var menu = createContextMenu(div);
     var arrowImage = new Image();
     arrowImage.src = 'img/arrow_down.png';
     div.mouseenter(function(event) {
@@ -218,7 +218,7 @@ function createVideoMenu(div) {
         //console.log(buttonLoc);
         if (x > buttonLoc().left && x < buttonLoc().left+buttonLoc().width &&
             y > buttonLoc().top && y < buttonLoc().top+buttonLoc().height) {
-                menu.slideDown(150);
+                //menu.slideDown(150);
                 console.log("Mouse in button." + buttonLoc())
         }
     });
@@ -277,11 +277,11 @@ function createContextMenu(div) {
 
 function positionContextMenu(div) {
     var menu = div.children('.contextMenu');
-    var menuX = div.width() - menu.width() - 4;
+    var menuX = div.width() - menu.width() - 8;
     console.log($(window).width());
     console.log(div.offset().left);
     if (menuX + div.offset().left >= $(window).width())
-        menuX = div.width()-menu.width()-1;
+        menuX = div.width()-menu.width()-16;
     console.log(menuX);
     menu.offset({left: menuX, top: div.height()-25});
     console.log(div);
