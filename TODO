@@ -16,7 +16,6 @@ Features
 - timestamps
 - Chat message sounds
 - Private messages
-√ Labels over each stream
 - Deterministic video arrangement
 - Larger input text (serif too)
 - validate usernames
@@ -33,6 +32,7 @@ Features
 - Audio stuttering issues
 - Private messages
 - Graphical emoticons/emoji (optional!)
+- Moderators
 
 Complete
 --------
@@ -44,4 +44,5 @@ Complete
 √ Video arrangement
 √ auto-link URLs in chat
 √ chatbox resizes down as video pane slides open
+√ Labels over each stream
 

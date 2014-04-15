@@ -224,6 +224,9 @@ function createVideoMenu(div) {
     for (var i=1; i<options.length; i++) { // Skip header
         if ($(options[i]).attr('class') !== 'disabled') {
             switch ($(options[i]).text()) {
+                case "Profile":
+                    // To be implemented
+                    break;
                 case "Maximize":
                     // To be implemented
                     break;
@@ -247,9 +250,21 @@ function createVideoMenu(div) {
                         console.log("Clicked mute.");
                     });
                     break;
-                case "Profile":
-                    // To be implemented
-                    break;
+                case "Volume":
+                    $(options[i]).children('.volume').append($(function () {
+                        $(".slider-vertical").slider({
+                            orientation: "vertical",
+                            range: "min",
+                            min: 0,
+                            max: 100,
+                            value: 100,
+                            slide: function (event, ui) {
+                                $("#amount").val(ui.value);
+                            }
+                        });
+                        $("#amount").val($(".slider-vertical").slider("value"));
+                    });
+                );
             }
         }
     }
