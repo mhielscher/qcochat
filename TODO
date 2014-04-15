@@ -1,27 +1,51 @@
-To Do
------
+TODO
+====
+
+Bugs
+----
 - Audio stuttering issues
+
+Features
+--------
 - Video/audio optional
+- unobtrusive JS (separate files too)
+- jQuery login
+- jQuery broadcast video/audio choices
+- Per-stream volume/mute
 - Fullscreen
 - Push-to-talk
-- Per-stream volume/mute
+- timestamps
 - Chat message sounds
 - Private messages
 - Deterministic video arrangement
 - Larger input text (serif too)
 - validate usernames
+- tab completion
+- chat highlighting
 - account system
 - account preferences
-- unobtrusive JS (separate files too)
-- timestamps
 - video aspect ratios
 - audio gain
 - per-stream audio volume
-- chatbox resizes down as video pane slides open
-- auto-link URLs in chat
-- private audio streams
-- chat highlighting
-- tab completion
+- private audio streams (??)
+- scheduled/impromptu events
+- URL fixification
+- Audio stuttering issues
+- Private messages
+- Graphical emoticons/emoji (optional!)
+- Moderators
+
+Complete
+--------
+√ Chat history (up arrow)
+√ /nick
+√ whitespace: pre
+√ See when users leave
+√ User list (per room!)
+√ Video arrangement
+√ auto-link URLs in chat
+√ chatbox resizes down as video pane slides open
+√ Labels over each stream
 
 To Done
 -------
